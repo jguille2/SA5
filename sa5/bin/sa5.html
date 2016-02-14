@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SA5</title>
+    <meta charset="utf-8">
+    <link rel="shortcut icon" href="img/favicon.ico">
+  </head>
+  <body style="background-image: url('img/logo1.jpg');background-repeat:no-repeat">
+    <h1>Snap/Scratch and Arduino Sync</h1>
+<div style="margin-top:200px">
+<a href="http://localhost:8123/ledon/1/3" target="hide_frame"><button>LED ON!</button></a>
+	<a href="http://localhost:8123/ledoff/1/3" target="hide_frame"><button>LED OFF!</button></a>
+<iframe style="display:none" src="javascript:void(0);" name="hide_frame"></iframe>
+</div>
+<hr>
+<div id="board_connect">
+  <form id="board_connect_form">
+    <input id="noStrictVendors" type="checkbox" value="1" name="noStrictVendors">All devices
+    <button type="button" onClick="connect_refresh();">Refresh</button>
+  </form>
+  <div id="connect_notify">
+  </div>
+  <div id="notes2">
+  </div>
+<div>
+
+
+<script>
+var webServer = require('http');
+var firmata = require('firmata');
+var arduinoVendors = ["0x2341","0x0930"];
+var noStrictVendors = 0;
+var serialPorts = require('serialport');
+var myBoards = [];
+var boards = [];
+var connectedBoards = [];
+firstConnection();
+
+
+//
+//
+//
+function webServerInit() {
+  webServer.createServer(function (request, response) {
+    console.log(request.url);
+    response.writeHead(200, {'Content-Type': 'text/html','Access-Control-Allow-Origin': '*'});
+    //response.writeHead(200, {'Content-Type': 'text/html'});
+    var command = request.url.substr(1).split("/");
+    console.log(request.url);
+    console.log(command);
+	  if ((request.url == "/poll") || (request.url == "/crossdomain.xml")) {
+	    console.log("responent el crosss");
+	    var policy = "";
+	    policy = "<cross-domain-policy>\n";
+            policy += "  <allow-access-from domain=\"*\" to-ports=\"";
+            //policy += "/dev/ttyACM0";
+            policy += "\"/>\n";
+            policy += "</cross-domain-policy>\n\0";
+	    response.write(policy);
+	  }
+    var cc = command[0];
+    var cb = command[1]-1;
+    var cp = command[2];
+    var cp2 = command[3];
+
+	  if (cc == "pinMode"){
+	    boards[cb].pinMode(cp,boards[cb].MODES[cp2]);
+	    console.log("pin "+cp+" posat a mode "+boards[cb].MODES[cp2]);
+          }
+	  if (cc == "digitalWrite"){
+	    boards[cb].digitalWrite(cp,boards[cb][cp2]);
+	    console.log("pin "+cp+" posat a estat "+boards[cb][cp2]);
+	  }
+	  if (cc == "ledon") {
+	    boards[cb].pinMode(cp, boards[cb].MODES.OUTPUT);
+	    boards[cb].digitalWrite(cp,boards[cb].HIGH);
+            console.log("ledon");
+	  }
+	  if (cc == "ledoff") {
+	    boards[cb].pinMode(cp, boards[cb].MODES.OUTPUT);
+	    boards[cb].digitalWrite(cp,boards[cb].LOW);
+	  }
+	  //if (request.url == "/poll") {
+	  //  resp = 'lec/1 '+comp;
+	  //  comp = comp +1;
+	  //  document.write(resp);
+	  //  response.write(resp);
+	  //  response.write("\r\n");
+	  //  response.write("loc " + comp);
+	  //}
+          if (cc == "pinValue") {
+//console.log(myBoards[cb].port);
+//board = new firmata.Board(myBoards[cb].port);
+//console.log(cp);
+//console.log(cb);
+//console.log(JSON.stringify(myBoards));
+//console.log(connectedBoards);
+//console.log(JSON.stringify(boards[cb].pins));
+            //boards[cb].pinMode(cp, boards[cb].MODES.INPUT);
+	    //boards[cb].digitalRead(cp,function(value){console.log(value);});
+            console.log(boards[cb].pins[cp].value);
+	    //console.log(boards[cb].digitalRead(cp,function(value){console.log(value);}));
+	    console.log("hola");
+            response.write(boards[cb].pins[cp].value.toString());
+	    //response.write("hola");//toString(boards[cb].pins[cp].value)+"\n");
+            //console.log(JSON.stringify(boards[cb].pins[cp],null,4)+"\r\n");
+          }
+    response.end();
+  }).listen(8123);
+}
+
+function secondServer(){
+webServer.createServer(function (request, response) {
+    console.log(request.url);
+    response.writeHead(200, {'Content-Type': 'text/html','Access-Control-Allow-Origin': '*'});
+    response.write("Provant...");
+    boards[0].pinMode(2,boards[0].MODES.INPUT);
+    response.write(boards[0].pins[2].value.toString());
+    response.end();
+}).listen(8111);
+}
+//
+//
+//
+function firstConnection() {
+  var arduinoBoards = [];
+  serialPorts.list(function(err,ports) {
+    var portsNum = ports.length;
+    for (index = 0; index < portsNum; index++) {
+      if (arduinoVendors.indexOf(ports[index].vendorId) != -1 || (noStrictVendors && ports[index].vendorId != "0xundefined")) {
+          arduinoBoards.push(ports[index]);
+      }
+    }
+    var arduinoNum = arduinoBoards.length;
+    for (index = 0; index < arduinoNum; index++) {
+      myBoards[index] = {connect:1, port: arduinoBoards[index].comName,id: arduinoBoards[index].serialNumber};
+      connectedBoards.push(index);
+console.log("abans...");
+      boards[index] = new firmata.Board(arduinoBoards[index].comName,function(err) {console.log(err);
+//boards[index] = new firmata.Board("/dev/ttyS9",function(err) {console.log(err);
+console.log("ins...");
+webServerInit();
+secondServer();
+});
+      //not for firmata 0.3.3 -> boards[index] = new firmata(arduinoBoards[index].comName);
+      //boards[index].on("ready", function() {
+//});
+    }
+    document.getElementById("connect_notify").innerHTML = ports.length+" connexió/connexions sèrie\n<pre>"+JSON.stringify(ports, null, 4)+"</pre>\n"+arduinoBoards.length+" placa/plaques Arduino\n<pre>"+JSON.stringify(arduinoBoards, null, 4)+JSON.stringify(myBoards, null, 4)+"</pre>";
+  });
+}
+//
+//
+//
+function connect_refresh(){
+  console.log(JSON.stringify(myBoards, null, 4));
+}
+function o2s(obj){
+  value = '';
+  for (st in obj) {
+    value += st;
+  }
+  return value;
+}
+//
+//
+//
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+</script>
+  </body>
+</html>

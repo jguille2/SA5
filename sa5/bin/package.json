@@ -1,0 +1,20 @@
+{
+  "name": "SA5",
+  "version": "0.0.1",
+  "main": "sa5.html",
+  "window": {
+    "toolbar": true,
+    "position": "center",
+    "width": 400,
+    "height": 400,
+	"icon": "img/favicon.png"
+  },
+ "dependencies": {
+    "firmata": ">=0.3.3",
+    "serialport": ">=1.6.0"
+      },
+  "devDependencies": {
+	"firmata": ">=0.3.3",
+	"serialport": ">=1.6.0"
+      }
+}
