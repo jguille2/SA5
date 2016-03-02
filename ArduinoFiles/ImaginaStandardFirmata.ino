@@ -27,7 +27,10 @@
 #include <Wire.h>
 #include <Firmata.h>
 //////////////////////////////////////////////////
-//Imagina includes
+//Imagina global includes and vars
+//
+#define IMAGINA_BOARD		   0xC0
+//Nunchuk lib from https://github.com/GabrielBianconi/ArduinoNunchuk
 #include <ArduinoNunchuk.h>
 ArduinoNunchuk nunchuk = ArduinoNunchuk();
 //////////////////////////////////////////////////
@@ -605,6 +608,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Firmata.write(1);
           Firmata.write((byte)OUTPUT);
           Firmata.write(1);
+//////////////////////////////////////////////////
+//Imagina. Marking pins for firmware detection
+	  Firmata.write((byte)IMAGINA_BOARD);
+	  Firmata.write(1);
+//////////////////////////////////////////////////
         }
         if (IS_PIN_ANALOG(pin)) {
           Firmata.write(PIN_MODE_ANALOG);
@@ -649,53 +657,53 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
       Firmata.write(END_SYSEX);
       break;
-    //////////////////////////////////////////////////
-    //Imagina commands
-    //
-    //Nunchuk commands
-    case 0xC0: //JoyX
+//////////////////////////////////////////////////
+//Imagina commands
+//
+//Nunchuk commands
+    case 0xC1: //JoyX
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.analogX, DEC);
       Serial.write(END_SYSEX);
       break;
-    case 0xC1: //JoyY
+    case 0xC2: //JoyY
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.analogY, DEC);
       Serial.write(END_SYSEX);
       break;
-    case 0xC2: //ButZ
+    case 0xC3: //ButZ
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.zButton, DEC);
       Serial.write(END_SYSEX);
       break;
-    case 0xC3: //ButC
+    case 0xC4: //ButC
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.cButton, DEC);
       Serial.write(END_SYSEX);
       break;
-    case 0xC4: //AccX
+    case 0xC5: //AccX
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.accelX, DEC);
       Serial.write(END_SYSEX);
       break;
-    case 0xC5: //AccY
+    case 0xC6: //AccY
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.accelY, DEC);
       Serial.write(END_SYSEX);
       break;
-    case 0xC6: //AccZ
+    case 0xC7: //AccZ
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
