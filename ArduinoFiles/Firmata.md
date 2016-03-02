@@ -17,7 +17,21 @@
     ```
 
   * Nunchuk commands (0xC1 to 0xC7)
-
+    * JoyX 0xC1
+    * Launcher
+    
+    ```javascript
+    this.JoyX = function(callback) {
+        var data =[
+		          0xF0,//START_SYSEX,
+		          0xC1,//JoyX command
+		          0xF7//END_SYSEX
+	       ];
+        this transport.write(new Buffer(data));
+        this.once("JoyX", callback);
+      };
+      ```
+      
 ## Arduino libraries
 
   * Installing arduino libraries info: https://www.arduino.cc/en/Guide/Libraries
