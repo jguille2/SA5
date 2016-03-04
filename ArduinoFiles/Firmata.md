@@ -18,7 +18,7 @@
 
   * Nunchuk commands (0xC1 to 0xC7)
     * JoyX 0xC1
-    * Launcher
+      * Launcher
     
     ```javascript
     this.JoyX = function(callback) {
@@ -31,7 +31,31 @@
         this.once("JoyX", callback);
       };
       ```
-      
+
+  * Tone comand (0xC8) Implements tone(pin,frequency,*duration) and noTone(pin)
+    * Arduino values
+      * pin -> We use 1 byte (0-255)
+      * frequency -> Hz -> unsigned int (2 bytes 0-65535) //Arduino Uno, min 32Hz
+      * duration (optional) -> ms -> unsigned long (4 bytes 0-4294967)
+    * Sending values
+      * We send 56 bit -> We need 8 bytes with 7b/B data
+      * Data: duration(32)-frequency(16)-pin(8)
+      * Sending MSB -> LSB
+    * Launcher
+      ```javascript
+      //Create blocs wit vars: pin, frequency and duration
+      if (this.pins[pin].supportedModes.indexOf(IMAGINA_BOARD) === -1) {
+        throw new Error("Please upload ImaginaFirmata to the board");
+      }
+      if (pin === undefined || frequency === undefined || pin <= 0 || pin > 255 || frequency <= 0 || frequency > 65535) {
+        throw new Error("Required var pin (0-255) and frequency (0-65535)");
+      }
+      var duration = duration || 0;
+      duration = duration & 0xFF; //clamping value to 32 bits
+      //TODO var data =[	0xF0,
+      //			0xC8,
+      //			
+      ```
 ## Arduino libraries
 
   * Installing arduino libraries info: https://www.arduino.cc/en/Guide/Libraries
