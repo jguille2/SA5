@@ -42,9 +42,11 @@
       * Data: duration(32)-frequency(16)-pin(8)
       * Sending MSB -> LSB
     * Launcher
+    
       ```javascript
-      //Create blocs wit vars: pin, frequency and duration
-      if (this.pins[pin].supportedModes.indexOf(IMAGINA_BOARD) === -1) {
+      //Create blocs wit vars: pin, freq (frequency 0-65535 Hz) and dur (duration 0-4294967 mseg)
+      board = this;  //Definition should change according to the context
+      if (board.pins[pin].supportedModes.indexOf(IMAGINA_BOARD) === -1) {
         throw new Error("Please upload ImaginaFirmata to the board");
       }
       if (pin === undefined || frequency === undefined || pin <= 0 || pin > 255 || frequency <= 0 || frequency > 65535) {
@@ -52,10 +54,21 @@
       }
       var duration = duration || 0;
       duration = duration & 0xFF; //clamping value to 32 bits
-      //TODO var data =[	0xF0,
-      //			0xC8,
-      //			
+      var data =[0xF0, //START_SYSEX
+      		0xC8,  //Tone Command
+      		(dur >> 25) & 0xF7,
+      		(dur >> 18) & 0xF7,
+      		(dur >> 11) & 0xF7,
+      		(dur >> 4) & 0xF7,
+      		((dur << 3) & parseInt("01111000",2)) | ((freq >> 13) & paseInt("0111",2)),
+      		(freq >> 6) & 0xF7,
+      		((freq << 1) & parseInt("01111110",2)) | ((pin >> 7) & parseInt("01",2)),
+      		pin & 0xF7,
+      		0xF7  //END_SYSEX
+      ];
+      board.transport.write(newBuffer(data));
       ```
+      
 ## Arduino libraries
 
   * Installing arduino libraries info: https://www.arduino.cc/en/Guide/Libraries
