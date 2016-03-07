@@ -21,22 +21,20 @@
       * Launcher
     
     ```javascript
-    this.JoyX = function(callback) {
-        var data =[
-		          0xF0,//START_SYSEX,
-		          0xC1,//JoyX command
-		          0xF7//END_SYSEX
+    board = this.arduino.board; //Definition should change according to the context
+    var data =[	0xF0,//START_SYSEX,
+		0xC1,//JoyX command
+		0xF7//END_SYSEX
 	       ];
-        this transport.write(new Buffer(data));
-        this.once("joyX", callback);
-      };
-      ```
+    board.transport.write(new Buffer(data));
+    board.once("joyX", callback);
+    ```
 
     * Response definition
 
       ```javascript
 	board = this.board; //Definition should change according to the context
-	board.SYSEX_RESPONSE[0xC1] = function(board) {
+	world.Arduino.firmata.SYSEX_RESPONSE[0xC1] = function(board) {
 	  var joyX = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
 	  board.emit("joyX", joyX);
 	}
