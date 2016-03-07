@@ -28,10 +28,19 @@
 		          0xF7//END_SYSEX
 	       ];
         this transport.write(new Buffer(data));
-        this.once("JoyX", callback);
+        this.once("joyX", callback);
       };
       ```
 
+    * Response definition
+
+      ```javascript
+	board = this.board; //Definition should change according to the context
+	board.SYSEX_RESPONSE[0xC1] = function(board) {
+	  var joyX = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
+	  board.emit("joyX", joyX);
+	}
+      ```
   * Tone comand (0xC8) Implements tone(pin,frequency,*duration) and noTone(pin)
     * Arduino values
       * pin -> We use 1 byte (0-255)
@@ -45,7 +54,7 @@
     
       ```javascript
       //Create blocs wit vars: pin, freq (frequency 0-65535 Hz) and dur (duration 0-4294967 mseg)
-      board = this;  //Definition should change according to the context
+      board = this.board;  //Definition should change according to the context
       IMAGINA_BOARD = 0xC0;
       //if (board.pins[pin].supportedModes.indexOf(IMAGINA_BOARD) === -1) {
       //  throw new Error("Please upload ImaginaFirmata to the board");

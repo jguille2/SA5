@@ -663,10 +663,13 @@ void sysexCallback(byte command, byte argc, byte *argv)
 //Nunchuk commands
     case 0xC1: //JoyX
       nunchuk.update();
-      Serial.write(START_SYSEX);
-      Serial.write(STRING_DATA);
-      Serial.println(nunchuk.analogX, DEC);
-      Serial.write(END_SYSEX);
+      byte responseArray[1];
+      responseArray[0] = nunchuk.analogX;
+      Firmata.sendSysex(0xC1,1,responseArray);      
+      //Serial.write(START_SYSEX);
+      //Serial.write(STRING_DATA);
+      //Serial.println(nunchuk.analogX, DEC);
+      //Serial.write(END_SYSEX);
       break;
     case 0xC2: //JoyY
       nunchuk.update();
