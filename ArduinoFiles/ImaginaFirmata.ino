@@ -710,7 +710,22 @@ void sysexCallback(byte command, byte argc, byte *argv)
       Serial.println(nunchuk.accelZ, DEC);
       Serial.write(END_SYSEX);
       break;
-    //////////////////////////////////////////////////
+//
+// Tone commands
+//
+    case 0xC8:  //Tone Commands
+      unsigned long dur = (unsigned long)argv[0] << 25 | (unsigned long)argv[1] << 18 | (unsigned long)argv[2] << 11 | (unsigned long)argv[3] << 4 | (unsigned long)argv[4] >> 3;
+      unsigned int freq = ((unsigned int)argv[4] & B0111) << 13 | (unsigned int)argv[5] << 6 | (unsigned int)argv[6] >> 1;
+      byte pin = ((byte)argv[6] & B01) << 7 | (byte)argv[7];
+      if (freq <32){
+	noTone(pin);
+      }else if (dur == 0){
+	tone(pin,freq);
+      }else {
+        tone(pin,freq,dur);
+      }
+      break;
+//////////////////////////////////////////////////
   }
 }
 

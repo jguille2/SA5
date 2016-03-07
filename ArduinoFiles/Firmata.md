@@ -46,29 +46,33 @@
       ```javascript
       //Create blocs wit vars: pin, freq (frequency 0-65535 Hz) and dur (duration 0-4294967 mseg)
       board = this;  //Definition should change according to the context
-      if (board.pins[pin].supportedModes.indexOf(IMAGINA_BOARD) === -1) {
-        throw new Error("Please upload ImaginaFirmata to the board");
-      }
-      if (pin === undefined || frequency === undefined || pin <= 0 || pin > 255 || frequency <= 0 || frequency > 65535) {
+      IMAGINA_BOARD = 0xC0;
+      //if (board.pins[pin].supportedModes.indexOf(IMAGINA_BOARD) === -1) {
+      //  throw new Error("Please upload ImaginaFirmata to the board");
+      //}
+      if (pin === undefined || freq === undefined || pin <= 0 || pin > 255 || freq < 0 || freq > 65535) {
         throw new Error("Required var pin (0-255) and frequency (0-65535)");
       }
-      var duration = duration || 0;
-      duration = duration & 0xFF; //clamping value to 32 bits
+      var dur = dur || 0;
+      dur = dur & 0xFFFF; //clamping value to 32 bits
       var data =[0xF0, //START_SYSEX
       		0xC8,  //Tone Command
-      		(dur >> 25) & 0xF7,
-      		(dur >> 18) & 0xF7,
-      		(dur >> 11) & 0xF7,
-      		(dur >> 4) & 0xF7,
-      		((dur << 3) & parseInt("01111000",2)) | ((freq >> 13) & paseInt("0111",2)),
-      		(freq >> 6) & 0xF7,
+      		(dur >> 25) & 0x7F,
+      		(dur >> 18) & 0x7F,
+      		(dur >> 11) & 0x7F,
+      		(dur >> 4) & 0x7F,
+      		((dur << 3) & parseInt("01111000",2)) | ((freq >> 13) & parseInt("0111",2)),
+      		(freq >> 6) & 0x7F,
       		((freq << 1) & parseInt("01111110",2)) | ((pin >> 7) & parseInt("01",2)),
-      		pin & 0xF7,
+      		pin & 0x7F,
       		0xF7  //END_SYSEX
       ];
-      board.transport.write(newBuffer(data));
+      board.transport.write(new Buffer(data));
       ```
-      
+    
+    * Arduino Sysex
+      * Var types: pin->byte (8bits), freq->unsigned int (16bits) and dur->unsigned long (32bits)
+
 ## Arduino libraries
 
   * Installing arduino libraries info: https://www.arduino.cc/en/Guide/Libraries
