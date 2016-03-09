@@ -34,17 +34,19 @@
 
   * Nunchuk commands (0xC0 to 0xC6)
     * joyX 0xC0
+
       * Value: return 1 byte. From 0 (left position) to 255 (right position). Center = 128
+
       * Launcher
     
       ```javascript
       board = this.context.board; //Definition should change according to the context
-      var data =[0xF0,//START_SYSEX,
-		0xC0,//joyX command
-		0xF7//END_SYSEX
-	       ];
-      board.transport.write(new Buffer(data));
-      board.once("joyX", callback);
+      board.once("joyX", callback(data));
+      var sdata =[0xF0,//START_SYSEX,
+				0xC0,//joyX command
+				0xF7//END_SYSEX
+	  ];
+      board.transport.write(new Buffer(sdata));
       ```
 
       * Response definition
@@ -52,24 +54,25 @@
       ```javascript
       board = this.context.board; //Definition should change according to the context
       world.Arduino.firmata.SYSEX_RESPONSE[0xC0] = function(board) {
-      var joyX = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
-      board.emit("joyX", joyX);
+      	var joyX = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
+      	board.emit("joyX", joyX);
       }
       ```
 
     * joyY 0xC1
 
       * Value: return 1 byte. From 0 (down) to 255 (up). Center = 128
+
       * Launcher
     
       ```javascript
       board = this.context.board; //Definition should change according to the context
-      var data =[0xF0,//START_SYSEX,
-		0xC1,//joyY command
-		0xF7//END_SYSEX
-	       ];
-      board.transport.write(new Buffer(data));
-      board.once("joyY", callback);
+      board.once("joyY", callback(data));
+      var sdata =[0xF0,//START_SYSEX,
+				0xC1,//joyY command
+				0xF7//END_SYSEX
+	  ];
+      board.transport.write(new Buffer(sdata));
       ```
 
       * Response definition
@@ -77,12 +80,143 @@
       ```javascript
       board = this.context.board; //Definition should change according to the context
       world.Arduino.firmata.SYSEX_RESPONSE[0xC1] = function(board) {
-      var joyY = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
-      board.emit("joyY", joyY);
+      	var joyY = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
+      	board.emit("joyY", joyY);
       }
       ```
+
+    * butZ 0xC2
+
+      * Value: return 1 bit. 0 -> NonPressed, 1 -> Pressed
+
+      * Launcher
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      board.once("butZ", callback(data));
+      var sdata =[0xF0,//START_SYSEX,
+				0xC2,//butZ command
+				0xF7//END_SYSEX
+	  ];
+      board.transport.write(new Buffer(sdata));
+      ```
+
+      * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xC2] = function(board) {
+      	var butZ = (board.currentBuffer[2] & 0x7F);
+      	board.emit("butZ", butZ);
+      }
+      ```
+
+    * butC 0xC3
+
+      * Value: return 1 bit. 0 -> NonPressed, 1 -> Pressed
+
+      * Launcher
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      board.once("butC", callback(data));
+      var sdata =[0xF0,//START_SYSEX,
+				0xC3,//butC command
+				0xF7//END_SYSEX
+	  ];
+      board.transport.write(new Buffer(sdata));
+      ```
+
+      * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xC3] = function(board) {
+      	var butC = (board.currentBuffer[2] & 0x7F);
+      	board.emit("butC", butC);
+      }
+      ```
+
+    * accX 0xC4
+
+      * Value: return 10 bits. Resting [left->280, center->508, right->736] -> acceleration increases values in the same direction
+
+      * Launcher
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      board.once("accX", callback(data));
+      var sdata =[0xF0,//START_SYSEX,
+				0xC4,//accX command
+				0xF7//END_SYSEX
+	  ];
+      board.transport.write(new Buffer(sdata));
+      ```
+
+      * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xC4] = function(board) {
+      	var accX = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
+      	board.emit("accX", accX);
+      }
+      ```
+
+    * accY 0xC5
+
+      * Value: return 10 bits. Resting [back->280, center->508, front->736] -> acceleration increases values in the same direction
+
+      * Launcher
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      board.once("accY", callback(data));
+      var sdata =[0xF0,//START_SYSEX,
+				0xC5,//accX command
+				0xF7//END_SYSEX
+	  ];
+      board.transport.write(new Buffer(sdata));
+      ```
+
+      * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xC5] = function(board) {
+      	var accY = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
+      	board.emit("accY", accY);
+      }
+      ```
+
+    * accZ 0xC6
+
+      * Value: return 10 bits. Resting [down->280, middle->508, up->736] -> acceleration increases values in the same direction
+
+      * Launcher
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      board.once("accZ", callback(data));
+      var sdata =[0xF0,//START_SYSEX,
+				0xC6,//accX command
+				0xF7//END_SYSEX
+	  ];
+      board.transport.write(new Buffer(sdata));
+      ```
+
+      * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xC6] = function(board) {
+      	var accZ = (board.currentBuffer[2] & 0x7F) | ((board.currentBuffer[3] & 0x7F) << 7);
+      	board.emit("accZ", accZ);
+      }
+      ```
+
   
-  * Tone comand (0xC8) Implements tone(pin,frequency,*duration) and noTone(pin)
+  * Tone comand (0xC7) Implements tone(pin,frequency,*duration) and noTone(pin)
     * Arduino values
       * pin -> We use 1 byte (0-255)
       * frequency -> Hz -> unsigned int (2 bytes 0-65535) //Arduino Uno, min 32Hz
@@ -95,18 +229,14 @@
     
       ```javascript
       //Create blocs wit vars: pin, freq (frequency 0-65535 Hz) and dur (duration 0-4294967 mseg)
-      board = this.board;  //Definition should change according to the context
-      IMAGINA_BOARD = 0xC0;
-      //if (board.pins[pin].supportedModes.indexOf(IMAGINA_BOARD) === -1) {
-      //  throw new Error("Please upload ImaginaFirmata to the board");
-      //}
+      board = this.context.board;  //Definition should change according to the context
       if (pin === undefined || freq === undefined || pin <= 0 || pin > 255 || freq < 0 || freq > 65535) {
         throw new Error("Required var pin (0-255) and frequency (0-65535)");
       }
       var dur = dur || 0;
       dur = dur & 0xFFFF; //clamping value to 32 bits
       var data =[0xF0, //START_SYSEX
-      		0xC8,  //Tone Command
+      		0xC7,  //Tone Command
       		(dur >> 25) & 0x7F,
       		(dur >> 18) & 0x7F,
       		(dur >> 11) & 0x7F,

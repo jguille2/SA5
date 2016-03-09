@@ -609,8 +609,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Firmata.write(1);
 //////////////////////////////////////////////////
 //Imagina. Marking digital pins for firmware detection
-	  	  Firmata.write((byte)0x05); //this is SHIFT mode in Firmata defintition
-	      Firmata.write(1);
+	  	    Firmata.write((byte)0x05); //this is SHIFT mode in Firmata defintition
+	        Firmata.write(1);
 //////////////////////////////////////////////////
         }
         if (IS_PIN_ANALOG(pin)) {
@@ -710,26 +710,38 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
       break;
 //TODO
-    case 0xC4: //AccX
+    case 0xC4: //accX
       nunchuk.update();
-      Serial.write(START_SYSEX);
-      Serial.write(STRING_DATA);
-      Serial.println(nunchuk.accelX, DEC);
-      Serial.write(END_SYSEX);
+      {
+        unsigned int value = nunchuk.accelX;
+        Serial.write(START_SYSEX);
+        Serial.write(0xC4);
+        Serial.write(value & B01111111); // LSB
+        Serial.write(value >> 7 & B01111111); // MSB
+        Serial.write(END_SYSEX);
+      }
       break;
-    case 0xC5: //AccY
+    case 0xC5: //accY
       nunchuk.update();
-      Serial.write(START_SYSEX);
-      Serial.write(STRING_DATA);
-      Serial.println(nunchuk.accelY, DEC);
-      Serial.write(END_SYSEX);
+      {
+        unsigned int value = nunchuk.accelY;
+        Serial.write(START_SYSEX);
+        Serial.write(0xC5);
+        Serial.write(value & B01111111); // LSB
+        Serial.write(value >> 7 & B01111111); // MSB
+        Serial.write(END_SYSEX);
+      }
       break;
-    case 0xC6: //AccZ
+    case 0xC6: //accZ
       nunchuk.update();
-      Serial.write(START_SYSEX);
-      Serial.write(STRING_DATA);
-      Serial.println(nunchuk.accelZ, DEC);
-      Serial.write(END_SYSEX);
+      {
+        unsigned int value = nunchuk.accelZ;
+        Serial.write(START_SYSEX);
+        Serial.write(0xC6);
+        Serial.write(value & B01111111); // LSB
+        Serial.write(value >> 7 & B01111111); // MSB
+        Serial.write(END_SYSEX);
+      }
       break;
 //TODO_ENDS
 //
