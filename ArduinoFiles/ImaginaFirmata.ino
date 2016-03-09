@@ -29,7 +29,6 @@
 //////////////////////////////////////////////////
 //Imagina global includes and vars
 //
-#define IMAGINA_BOARD		   0xC0
 //Nunchuk lib from https://github.com/GabrielBianconi/ArduinoNunchuk
 #include <ArduinoNunchuk.h>
 ArduinoNunchuk nunchuk = ArduinoNunchuk();
@@ -609,9 +608,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Firmata.write((byte)OUTPUT);
           Firmata.write(1);
 //////////////////////////////////////////////////
-//Imagina. Marking pins for firmware detection
-	  Firmata.write((byte)IMAGINA_BOARD);
-	  Firmata.write(1);
+//Imagina. Marking digital pins for firmware detection
+	  	  Firmata.write((byte)0x05); //this is SHIFT mode in Firmata defintition
+	      Firmata.write(1);
 //////////////////////////////////////////////////
         }
         if (IS_PIN_ANALOG(pin)) {
@@ -661,62 +660,82 @@ void sysexCallback(byte command, byte argc, byte *argv)
 //Imagina commands
 //
 //Nunchuk commands
-    case 0xC1: //JoyX
+    case 0xC0: //joyX
       nunchuk.update();
-      byte responseArray[1];
-      responseArray[0] = nunchuk.analogX;
-      Firmata.sendSysex(0xC1,1,responseArray);      
+	  {
+      //byte responseArray[1];
+      //responseArray[0] = nunchuk.analogX;
+      //Firmata.sendSysex(0xC0,1,responseArray);      
       //Serial.write(START_SYSEX);
       //Serial.write(STRING_DATA);
       //Serial.println(nunchuk.analogX, DEC);
       //Serial.write(END_SYSEX);
+	  byte value = nunchuk.analogX;
+	  Serial.write(START_SYSEX);
+	  Serial.write(0xC0);
+	  Serial.write(value & B01111111); // LSB
+	  Serial.write(value >> 7 & B01111111); // MSB
+	  Serial.write(END_SYSEX);
+	  }
       break;
-    case 0xC2: //JoyY
+    case 0xC1: //joyY
       nunchuk.update();
-      Serial.write(START_SYSEX);
-      Serial.write(STRING_DATA);
-      Serial.println(nunchuk.analogY, DEC);
-      Serial.write(END_SYSEX);
+	  {
+      byte value = nunchuk.analogY;
+	  Serial.write(START_SYSEX);
+	  Serial.write(0xC1);
+	  Serial.write(value & B01111111); // LSB
+	  Serial.write(value >> 7 & B01111111); // MSB
+	  Serial.write(END_SYSEX);
+	  }
       break;
-    case 0xC3: //ButZ
+    case 0xC2: //butZ
       nunchuk.update();
-      Serial.write(START_SYSEX);
-      Serial.write(STRING_DATA);
-      Serial.println(nunchuk.zButton, DEC);
-      Serial.write(END_SYSEX);
+      {
+        byte value = nunchuk.zButton;
+        Serial.write(START_SYSEX);
+        Serial.write(0xC2);
+        Serial.write(value & B01111111); //It's only 1 bit
+        Serial.write(END_SYSEX);
+      }
       break;
-    case 0xC4: //ButC
+    case 0xC3: //butC
       nunchuk.update();
-      Serial.write(START_SYSEX);
-      Serial.write(STRING_DATA);
-      Serial.println(nunchuk.cButton, DEC);
-      Serial.write(END_SYSEX);
+      {
+        byte value = nunchuk.cButton;
+        Serial.write(START_SYSEX);
+        Serial.write(0xC3);
+        Serial.write(value & B01111111); //It's only 1 bit
+        Serial.write(END_SYSEX);
+      }
       break;
-    case 0xC5: //AccX
+//TODO
+    case 0xC4: //AccX
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.accelX, DEC);
       Serial.write(END_SYSEX);
       break;
-    case 0xC6: //AccY
+    case 0xC5: //AccY
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.accelY, DEC);
       Serial.write(END_SYSEX);
       break;
-    case 0xC7: //AccZ
+    case 0xC6: //AccZ
       nunchuk.update();
       Serial.write(START_SYSEX);
       Serial.write(STRING_DATA);
       Serial.println(nunchuk.accelZ, DEC);
       Serial.write(END_SYSEX);
       break;
+//TODO_ENDS
 //
 // Tone commands
 //
-    case 0xC8:  //Tone Commands
+    case 0xC7:  //Tone Commands
       unsigned long dur = (unsigned long)argv[0] << 25 | (unsigned long)argv[1] << 18 | (unsigned long)argv[2] << 11 | (unsigned long)argv[3] << 4 | (unsigned long)argv[4] >> 3;
       unsigned int freq = ((unsigned int)argv[4] & B0111) << 13 | (unsigned int)argv[5] << 6 | (unsigned int)argv[6] >> 1;
       byte pin = ((byte)argv[6] & B01) << 7 | (byte)argv[7];
