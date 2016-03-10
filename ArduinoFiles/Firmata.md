@@ -5,8 +5,8 @@
   * Base: StandardFirmata.ino from Firmata 2.5.1 (26/12/2015) (Source: https://github.com/firmata/arduino)
   * Imagina global includes and vars
     * ArduinoNunchuk lib included from https://github.com/GabrielBianconi/ArduinoNunchuk
-    * 
-  * Marking digital pins with SWIFT mode (0x05) for firmware detection
+
+  * Marking digital pins with SHIFT mode (0x05) for firmware detection
     * When code requires ImaginaFirmata firmware, we can use:
 
     ```javascript
@@ -218,9 +218,9 @@
   
   * Tone comand (0xC7) Implements tone(pin,frequency,*duration) and noTone(pin)
     * Arduino values
-      * pin -> We use 1 byte (0-255)
+      * pin -> We use 1 byte (0-255). Firmata uses 0 and 1 pin.
       * frequency -> Hz -> unsigned int (2 bytes 0-65535) //Arduino Uno, min 32Hz
-      * duration (optional) -> ms -> unsigned long (4 bytes 0-4294967)
+      * duration (optional) -> milliseconds -> unsigned long (4 bytes 0-4294967295 more than 49 days!!)
     * Sending values
       * We send 56 bit -> We need 8 bytes with 7b/B data
       * Data: duration(32)-frequency(16)-pin(8)
@@ -228,10 +228,10 @@
     * Launcher
     
       ```javascript
-      //Create blocs wit vars: pin, freq (frequency 0-65535 Hz) and dur (duration 0-4294967 mseg)
+      //Create blocs wit vars: pin, freq (frequency 0-65535 Hz) and dur (duration 0-4294967295 milliseconds)
       board = this.context.board;  //Definition should change according to the context
-      if (pin === undefined || freq === undefined || pin <= 0 || pin > 255 || freq < 0 || freq > 65535) {
-        throw new Error("Required var pin (0-255) and frequency (0-65535)");
+      if (pin === undefined || freq === undefined || pin <= 1 || pin > 255 || freq < 0 || freq > 65535) {
+        throw new Error("Required var pin (2-255) and frequency (0-65535)");
       }
       var dur = dur || 0;
       dur = dur & 0xFFFF; //clamping value to 32 bits
@@ -252,6 +252,48 @@
     
     * Arduino Sysex
       * Var types: pin->byte (8bits), freq->unsigned int (16bits) and dur->unsigned long (32bits)
+
+  * PulseIn command 0xC8
+
+  	*Arduino values
+  	  * pin ->We use 1 byte (0-255)
+  	  * value ->type of pulse to read (HIGH/LOW) -> 1bit (1/0)
+  	  * timeout (optional)->microseconds to wait for the pulse to be completed ->unsigned long (32 bits-> 0-4294967295 more than 71 minutes). It's optional and its default value is one second -> 1000000.
+
+    * Launcher
+    
+      ```javascript
+      //Create blocs wit vars: pin, value (1/0) and timeout (0-4294967295 microseconds)
+      board = this.context.board;  //Definition should change according to the context
+      if (pin === undefined || pin <= 1 || pin > 255 || value < 0 || value > 1) {
+        throw new Error("Required var pin (2-255) and value (0/1)");
+      }
+      var timeout = timeout || 0;
+      timeout = timeout & 0xFFFF; //clamping value to 32 bits
+      board.once("pulseIn-"+pin, callback(data));
+      var data =[0xF0, //START_SYSEX
+      		0xC8,  //PulseIn Command
+      		(timeout >> 25) & 0x7F,
+      		(timeout >> 18) & 0x7F,
+      		(timeout >> 11) & 0x7F,
+      		(timeout >> 4) & 0x7F,
+      		((timeout << 3) & parseInt("01111000",2)) | ((value << 2) & parseInt("0100",2)) | ((pin >> 6) & parseInt("011",2)),
+      		(pin & parseInt("0111111",2)),
+      		0xF7  //END_SYSEX
+      ];
+      board.transport.write(new Buffer(data));
+      ```
+    * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xC8] = function(board) {
+      	var pulse = (board.currentBuffer[2] & 0x7F) << 25| (board.currentBuffer[3] & 0x7F) << 18 | (board.currentBuffer[4] & 0x7F) << 11 | (board.currentBuffer[5] & 0x7F) << 4 | (board.currentBuffer[6] & 0x7F) >> 3;
+      	var pin = (board.currentBuffer[6] & 0x7F) << 5 | (board.currentBuffer[7] & B011111);
+      	board.emit("pulseIn-"+pin, pulse);
+      }
+      ```
+
 
 ## Arduino libraries
 

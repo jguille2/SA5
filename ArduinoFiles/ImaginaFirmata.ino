@@ -709,7 +709,6 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Serial.write(END_SYSEX);
       }
       break;
-//TODO
     case 0xC4: //accX
       nunchuk.update();
       {
@@ -743,20 +742,47 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Serial.write(END_SYSEX);
       }
       break;
-//TODO_ENDS
 //
 // Tone commands
 //
-    case 0xC7:  //Tone Commands
-      unsigned long dur = (unsigned long)argv[0] << 25 | (unsigned long)argv[1] << 18 | (unsigned long)argv[2] << 11 | (unsigned long)argv[3] << 4 | (unsigned long)argv[4] >> 3;
-      unsigned int freq = ((unsigned int)argv[4] & B0111) << 13 | (unsigned int)argv[5] << 6 | (unsigned int)argv[6] >> 1;
-      byte pin = ((byte)argv[6] & B01) << 7 | (byte)argv[7];
-      if (freq <32){
-	noTone(pin);
-      }else if (dur == 0){
-	tone(pin,freq);
-      }else {
-        tone(pin,freq,dur);
+    case 0xC7:  //tone and noTone Commands
+      {
+        unsigned long dur = (unsigned long)argv[0] << 25 | (unsigned long)argv[1] << 18 | (unsigned long)argv[2] << 11 | (unsigned long)argv[3] << 4 | (unsigned long)argv[4] >> 3;
+        unsigned int freq = ((unsigned int)argv[4] & B0111) << 13 | (unsigned int)argv[5] << 6 | (unsigned int)argv[6] >> 1;
+        byte pin = ((byte)argv[6] & B01) << 7 | (byte)argv[7];
+        if (freq <32){
+	        noTone(pin);
+        }else if (dur == 0){
+	        tone(pin,freq);
+        }else {
+          tone(pin,freq,dur);
+        }
+      }
+      break;
+//
+//PulseIn
+//
+    case 0xC8:  //pulseIn
+      {
+        unsigned long timeout = (unsigned long)argv[0] << 25 | (unsigned long)argv[1] << 18 | (unsigned long)argv[2] << 11 | (unsigned long)argv[3] << 4 | (unsigned long)argv[4] >> 3;
+        byte value = ((byte)argv[4] & B0100) >> 2;
+        byte pin = ((byte)argv[4] & B011) << 6 | ((byte)argv[5] & B0111111);
+        pinMode(pin,INPUT);
+        unsigned long pulse;
+        if (timeout == 0) {
+          pulse = pulseIn(pin,value);
+        } else{
+          pulse = pulseIn(pin,value,timeout);
+        }
+        Serial.write(START_SYSEX);
+        Serial.write(0xC8);
+        Serial.write((pulse >> 25) & B01111111); // MSB
+        Serial.write((pulse >> 18) & B01111111);
+        Serial.write((pulse >> 11) & B01111111);
+        Serial.write((pulse >> 4) & B01111111);
+        Serial.write((pulse << 3) & B01111000 | (pin >> 5) & B0111); //LSB + pinMSB
+        Serial.write(pin & B011111);
+        Serial.write(END_SYSEX);
       }
       break;
 //////////////////////////////////////////////////
