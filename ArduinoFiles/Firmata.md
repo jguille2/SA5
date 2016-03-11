@@ -289,7 +289,7 @@
       board = this.context.board; //Definition should change according to the context
       world.Arduino.firmata.SYSEX_RESPONSE[0xC8] = function(board) {
       	var pulse = (board.currentBuffer[2] & 0x7F) << 25| (board.currentBuffer[3] & 0x7F) << 18 | (board.currentBuffer[4] & 0x7F) << 11 | (board.currentBuffer[5] & 0x7F) << 4 | (board.currentBuffer[6] & 0x7F) >> 3;
-      	var pin = (board.currentBuffer[6] & 0x7F) << 5 | (board.currentBuffer[7] & B011111);
+      	var pin = (board.currentBuffer[6] & 0x7F) << 5 | (board.currentBuffer[7] & parseInt("011111",2));
       	board.emit("pulseIn-"+pin, pulse);
       }
       ```
