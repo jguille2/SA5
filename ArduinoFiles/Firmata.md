@@ -234,7 +234,7 @@
         throw new Error("Required var pin (2-255) and frequency (0-65535)");
       }
       var dur = dur || 0;
-      dur = dur & 0xFFFF; //clamping value to 32 bits
+      dur = dur & 0xFFFFFFFF; //clamping value to 32 bits
       var data =[0xF0, //START_SYSEX
       		0xC7,  //Tone Command
       		(dur >> 25) & 0x7F,
@@ -268,8 +268,8 @@
       if (pin === undefined || pin <= 1 || pin > 255 || value < 0 || value > 1) {
         throw new Error("Required var pin (2-255) and value (0/1)");
       }
-      var timeout = timeout || 0;
-      timeout = timeout & 0xFFFF; //clamping value to 32 bits
+      var timeout = timeout || 1000000; //Default timeout is 1 second (like Arduino does)
+      timeout = timeout & 0xFFFFFFFF; //clamping value to 32 bits
       board.once("pulseIn-"+pin, callback(data));
       var data =[0xF0, //START_SYSEX
       		0xC8,  //PulseIn Command
