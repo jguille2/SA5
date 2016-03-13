@@ -263,12 +263,14 @@
     * Launcher
     
       ```javascript
-      //Create blocs wit vars: pin, value (1/0) and timeout (0-4294967295 microseconds)
+      //Create blocs wit vars: pin, stValue (HIGH/LOW) and timeout (0-4294967295 microseconds)
       board = this.context.board;  //Definition should change according to the context
-      if (pin === undefined || pin <= 1 || pin > 255 || value < 0 || value > 1) {
-        throw new Error("Required var pin (2-255) and value (0/1)");
+      value = 1;
+	  if (stValue == "LOW") {value = 0;} //only explicit LOW return a low pulse 
+      if (pin === undefined || pin <= 1 || pin > 255) {
+        throw new Error("Required var pin (2-255)");
       }
-      var timeout = timeout || 1000000; //Default timeout is 1 second (like Arduino does)
+      var timeout = timeout || 0; //undefined will be 0, and 0 causes Arduino's default (1s)
       timeout = timeout & 0xFFFFFFFF; //clamping value to 32 bits
       board.once("pulseIn-"+pin, callback(data));
       var data =[0xF0, //START_SYSEX
@@ -289,7 +291,7 @@
       board = this.context.board; //Definition should change according to the context
       world.Arduino.firmata.SYSEX_RESPONSE[0xC8] = function(board) {
       	var pulse = (board.currentBuffer[2] & 0x7F) << 25| (board.currentBuffer[3] & 0x7F) << 18 | (board.currentBuffer[4] & 0x7F) << 11 | (board.currentBuffer[5] & 0x7F) << 4 | (board.currentBuffer[6] & 0x7F) >> 3;
-      	var pin = (board.currentBuffer[6] & 0x7F) << 5 | (board.currentBuffer[7] & parseInt("011111",2));
+      	var pin = (board.currentBuffer[6] & parseInt("0111",2)) << 5 | (board.currentBuffer[7] & parseInt("011111",2));
       	board.emit("pulseIn-"+pin, pulse);
       }
       ```
