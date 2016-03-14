@@ -796,8 +796,21 @@ void sysexCallback(byte command, byte argc, byte *argv)
         byte value = ((byte)argv[4] & B010) >>1;
         byte pin = ((byte)argv[4] & B01) << 7 | (byte)argv[5] & B01111111;
         pinMode(pin,OUTPUT);
-        
+        if (value == 1) {
+          var state1 = LOW;
+          var state2 = HIGH;
+        } else {
+          var state1 = HIGH;
+          var state2 = LOW;
+        }
+        digitalWrite(pin,state1);
+        delayMicroseconds(time1);
+        digitalWrite(pin,state2);
+        delayMicroseconds(time2);
+        digitalWrite(pin,state1);
+        delayMicroseconds(time3);
       }
+      break;
 //////////////////////////////////////////////////
   }
 }

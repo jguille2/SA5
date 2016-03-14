@@ -259,6 +259,7 @@
   	  * pin ->We use 1 byte (0-255)
   	  * value ->type of pulse to read (HIGH/LOW) -> 1bit (1/0)
   	  * timeout (optional)->microseconds to wait for the pulse to be completed ->unsigned long (32 bits-> 0-4294967295 more than 71 minutes). It's optional and its default value is one second -> 1000000.
+  	  * pulse (pulseIn return value) -> microseconds (pulse length) ->unsigned long (32 bits-> 0-4294967295)
 
     * Launcher
     
