@@ -785,6 +785,19 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Serial.write(END_SYSEX);
       }
       break;
+//
+//microsecondsPulseOut
+//
+    case 0xC9:  //pulseOut command)
+      {
+        unsigned int time1 = (unsigned int)argv[0] << 4 | (unsigned int)argv[1] >> 3;
+        unsigned int time2 = (unsigned int)argv[1] << 8 | (unsigned int)argv[2] << 1 | (unsigned int)argv[3] >> 6;
+        unsigned int time3 = (unsigned int)argv[3] << 5 | (unsigned int)argv[4] >>2;
+        byte value = ((byte)argv[4] & B010) >>1;
+        byte pin = ((byte)argv[4] & B01) << 7 | (byte)argv[5] & B01111111;
+        pinMode(pin,OUTPUT);
+        
+      }
 //////////////////////////////////////////////////
   }
 }

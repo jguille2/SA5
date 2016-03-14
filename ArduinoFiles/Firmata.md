@@ -295,6 +295,44 @@
       	board.emit("pulseIn-"+pin, pulse);
       }
       ```
+ * microsecondsPulseOut command 0xC9
+
+  	*Arduino values
+  	  * pin ->We use 1 byte (0-255)
+  	  * value ->type of pulse to make (HIGH/LOW) -> 1bit (1/0)
+  	  * time1 (time before), time2 (pulse time) and time3 (time after) in microseconds. We use 11 bits (0-2047 microseconds)
+  	  * We need 42 data bits -> 6 bytes (with 7 data-bits/byte)
+
+    * Launcher
+    
+      ```javascript
+      //Create blocs wit vars: pin, stValue (HIGH/LOW), time1, time2 and time3 (0-2047 microseconds)
+      board = this.context.board;  //Definition should change according to the context
+      value = 1;
+	  if (stValue == "LOW") {value = 0;} //only explicit LOW causes a low pulse 
+      if (pin === undefined || pin <= 1 || pin > 255) {
+        throw new Error("Required var pin (2-255)");
+      }
+      //undefined time will be 0 seconds
+      var time1 = time1 || 0;
+      var time2 = time2 || 0;
+      var time3 = time3 || 0;
+      //clamping time values to 11 bits
+      time1 = time1 & parseInt("011111111111",2);
+      time2 = time2 & parseInt("011111111111",2);
+      time3 = time3 & parseInt("011111111111",2);
+      var data =[0xF0, //START_SYSEX
+      		0xC9,  //microsecondsPulseOut Command
+      		(time1 >> 4) & 0x7F,
+      		((time1 << 3) & parseInt("01111000",2)) | ((time2 >> 8) & parseInt("0111",2)),
+      		(time2 >> 1) & 0x7F,
+      		((time2 << 6) & parseInt("01000000",2)) | ((time3 >> 5) & parseInt("0111111",2)),
+      		((time3 << 2 & parseInt("01111100",2)) | ((value << 1) & parseInt("010",2)) | ((pin >> 7) & parseInt("01",2)),
+      		(pin & 0x7F), 
+      		0xF7  //END_SYSEX
+      ];
+      board.transport.write(new Buffer(data));
+      ```
 
 
 ## Arduino libraries
