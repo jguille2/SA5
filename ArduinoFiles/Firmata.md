@@ -172,8 +172,8 @@
       ```javascript
       board = this.context.board; //Definition should change according to the context
       board.once("accY", callback(data));
-      var sdata =[0xF0,//START_SYSEX,
-				0xC5,//accX command
+      var sdata =[0xF0,//START_SYSEX
+				0xC5,//accY command
 				0xF7//END_SYSEX
 	  ];
       board.transport.write(new Buffer(sdata));
@@ -198,8 +198,8 @@
       ```javascript
       board = this.context.board; //Definition should change according to the context
       board.once("accZ", callback(data));
-      var sdata =[0xF0,//START_SYSEX,
-				0xC6,//accX command
+      var sdata =[0xF0,//START_SYSEX
+				0xC6,//accZ command
 				0xF7//END_SYSEX
 	  ];
       board.transport.write(new Buffer(sdata));
@@ -328,11 +328,49 @@
       		((time1 << 3) & parseInt("01111000",2)) | ((time2 >> 8) & parseInt("0111",2)),
       		(time2 >> 1) & 0x7F,
       		((time2 << 6) & parseInt("01000000",2)) | ((time3 >> 5) & parseInt("0111111",2)),
-      		((time3 << 2 & parseInt("01111100",2)) | ((value << 1) & parseInt("010",2)) | ((pin >> 7) & parseInt("01",2)),
+      		((time3 << 2) & parseInt("01111100",2)) | ((value << 1) & parseInt("010",2)) | ((pin >> 7) & parseInt("01",2)),
       		(pin & 0x7F), 
       		0xF7  //END_SYSEX
       ];
       board.transport.write(new Buffer(data));
+      ```
+  * Ping command 0xCA
+
+  	*Arduino values
+  	  * pinSen -> 1 byte (2-255) for sender pin
+  	  * pinRec -> 1 byte (2-255) for receiver pin
+  	  * pulse -> pulse length response in microseconds -> 2 bytes (0-65535). The maximum distance detected from sensor is about 4m -> 8m of sound tour. 10m would be (29,41µs/cm) 29,41 ms
+  	  * time1 (time before sended pulse) -> 5 bits (0-31) microseconds (typical value is 2 µs)
+  	  * time2 (time of the sended pulse) -> 5 bits (0-31) microseconds (typical value is 5 µs)
+
+    * Launcher
+    
+      ```javascript
+      //Create blocs wit vars: pinSen, pinRec (2-255), time1 and time2 (0-31 microseconds)
+      board = this.context.board;  //Definition should change according to the context
+      if (pinSen === undefined || pinSen <= 1 || pinSen > 255 || pinRec === undefined || pinRec <= 1 || pinRec > 255) {
+        throw new Error("Required vars pinSen and pinRec (2-255)");
+      }
+      board.once("ping-"+pinRec, callback(data));
+      var data =[0xF0, //START_SYSEX
+      		0xCA,  //Ping Command
+      		(pinSen >> 1) & 0x7F,
+      		(pinSen << 6) | (time1 & parseInt("011111",2)),
+      		(pinRec >> 1) & 0x7F,
+      		(pinRec << 6) | (time2 & parseInt("011111",2)),
+      		0xF7  //END_SYSEX
+      ];
+      board.transport.write(new Buffer(data));
+      ```
+    * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xCA] = function(board) {
+      	var pulse = (board.currentBuffer[2] & 0x7F) << 9| (board.currentBuffer[3] & 0x7F) << 2 | (board.currentBuffer[4] & parseInt("01100000",2)) >> 5;
+      	var pin = (board.currentBuffer[4] & parseInt("011111",2)) << 3 | (board.currentBuffer[5] & parseInt("0111",2));
+      	board.emit("ping-"+pin, pulse);
+      }
       ```
 
 

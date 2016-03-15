@@ -788,7 +788,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 //
 //microsecondsPulseOut
 //
-    case 0xC9:  //pulseOut command)
+    case 0xC9:  //pulseOut command
       {
         unsigned int time1 = (unsigned int)argv[0] << 4 | (unsigned int)argv[1] >> 3;
         unsigned int time2 = (unsigned int)argv[1] << 8 | (unsigned int)argv[2] << 1 | (unsigned int)argv[3] >> 6;
@@ -796,12 +796,14 @@ void sysexCallback(byte command, byte argc, byte *argv)
         byte value = ((byte)argv[4] & B010) >>1;
         byte pin = ((byte)argv[4] & B01) << 7 | (byte)argv[5] & B01111111;
         pinMode(pin,OUTPUT);
+        int state1;
+        int state2;
         if (value == 1) {
-          var state1 = LOW;
-          var state2 = HIGH;
+          state1 = LOW;
+          state2 = HIGH;
         } else {
-          var state1 = HIGH;
-          var state2 = LOW;
+          state1 = HIGH;
+          state2 = LOW;
         }
         digitalWrite(pin,state1);
         delayMicroseconds(time1);
@@ -809,6 +811,32 @@ void sysexCallback(byte command, byte argc, byte *argv)
         delayMicroseconds(time2);
         digitalWrite(pin,state1);
         delayMicroseconds(time3);
+      }
+      break;
+//
+//ping commands
+//
+    case 0xCA: //ping command
+      {
+        byte pinSen = (byte)argv[0] << 1 | (byte)argv[1] >> 6;
+        byte pinRec = (byte)argv[2] << 1 | (byte)argv[3] >> 6;
+        byte time1 = (byte)argv[1] & B011111;
+        byte time2 = (byte)argv[3] & B011111;
+        pinMode(pinSen, OUTPUT);
+        digitalWrite(pinSen, LOW);
+        delayMicroseconds(time1);
+        digitalWrite(pinSen, HIGH);
+        delayMicroseconds(time2);
+        digitalWrite(pinSen, LOW);
+        pinMode(pinRec, INPUT);
+        unsigned int pulse = pulseIn(pinRec, HIGH, 65535); //timeout is maximum pulse value
+        Serial.write(START_SYSEX);
+        Serial.write(0xCA);
+        Serial.write((pulse >> 9) & B01111111); // MSB pulse
+        Serial.write((pulse >> 2) & B01111111);
+        Serial.write((pulse << 5) & B01100000) | ((pinRec >> 3) & B011111); //LSB pulse and MSB pinRec
+        Serial.write(pinRec & B0111); // LSB pinRec
+        Serial.write(END_SYSEX);
       }
       break;
 //////////////////////////////////////////////////
