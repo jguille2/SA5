@@ -32,6 +32,12 @@
 //Nunchuk lib from https://github.com/GabrielBianconi/ArduinoNunchuk
 #include <ArduinoNunchuk.h>
 ArduinoNunchuk nunchuk = ArduinoNunchuk();
+//
+//IRremote lib from https://github.com/z3t0/Arduino-IRremote
+#include <IRremote.h>
+int RECV_PIN = 11;
+IRrecv irrecv(RECV_PIN);
+decode_results results;
 //////////////////////////////////////////////////
 
 #define I2C_WRITE                   B00000000
@@ -814,7 +820,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
       break;
 //
-//ping commands
+//ping command
 //
     case 0xCA: //ping command
       {
@@ -839,6 +845,16 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Serial.write(END_SYSEX);
       }
       break;
+//
+//IR receiver
+//
+    case 0xCB: //IR receiver
+      {
+        if (irrecv.decode(&results)) {
+          Serial.println(results.value, HEX);
+          irrecv.resume(); // Receive the next value
+        }
+      }
 //////////////////////////////////////////////////
   }
 }
@@ -948,6 +964,8 @@ void setup()
   //
   //Nunchuk setup
   nunchuk.init();
+  //IRremote setup
+  irrecv.enableIRIn();
   //////////////////////////////////////////////////
 }
 

@@ -3,8 +3,9 @@
 ## ImaginaFirmata.ino
 
   * Base: StandardFirmata.ino from Firmata 2.5.1 (26/12/2015) (Source: https://github.com/firmata/arduino)
-  * Imagina global includes and vars
+  * Other libraries:
     * ArduinoNunchuk lib included from https://github.com/GabrielBianconi/ArduinoNunchuk
+    * IRremote 2.1.0 from https://github.com/z3t0/Arduino-IRremote
 
   * Marking digital pins with SHIFT mode (0x05) for firmware detection
     * When code requires ImaginaFirmata firmware, we can use:
@@ -372,7 +373,21 @@
       	board.emit("ping-"+pin, pulse);
       }
       ```
+  * IR receiver command 0xCB
 
+  	* Arduino values
+  	  * int RECV_PIN = 11 then, pin for IR receiver is fixed
+
+  	* Launcher
+
+  	  ```javascript
+  	  //Reporter block
+  	  board = this.context.board; //Definition should change according to the context
+  	  board.once("IRrec", callback(data));
+  	  board.transport.write(new Buffer(data));
+  	  ```
+
+  	* Response definition
 
 ## Arduino libraries
 
