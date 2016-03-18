@@ -850,10 +850,19 @@ void sysexCallback(byte command, byte argc, byte *argv)
 //
     case 0xCB: //IR receiver
       {
+        unsigned long irResult;
         if (irrecv.decode(&results)) {
-          Serial.println(results.value, HEX);
+          irResult = results.value;
           irrecv.resume(); // Receive the next value
         }
+        Serial.write(START_SYSEX);
+        Serial.write(0xCB);
+        Serial.write((irResult >> 25) & B01111111); // MSB
+        Serial.write((irResult >> 18) & B01111111);
+        Serial.write((irResult >> 11) & B01111111);
+        Serial.write((irResult >> 4) & B01111111);
+        Serial.write((irResult << 3) & B01111000); // LSB
+        Serial.write(END_SYSEX);
       }
 //////////////////////////////////////////////////
   }
