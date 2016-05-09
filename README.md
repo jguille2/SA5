@@ -16,4 +16,4 @@ Scratch/Snap and Arduino Synchronized
   
 ## Working with Snap! and Picaxe
 
-We can use S2P Picaxe software (made to sync Scratch and Picaxe) and work with Snap!. More info here.
+We can use S2P Picaxe software (made to sync Scratch and Picaxe) and work with Snap!. More info [here](https://github.com/jguille2/SA5/blob/master/Picaxe/README.md).
