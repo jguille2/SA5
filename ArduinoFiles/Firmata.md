@@ -6,6 +6,7 @@
   * Other libraries:
     * ArduinoNunchuk lib included from https://github.com/GabrielBianconi/ArduinoNunchuk
     * IRremote 2.1.0 from https://github.com/z3t0/Arduino-IRremote
+    * TimerFreeTone v1.3 beta from https://bitbucket.org/teckel12/arduino-timer-free-tone/wiki/Home
 
   * Marking digital pins with SHIFT mode (0x05) for firmware detection
     * When code requires ImaginaFirmata firmware, we can use:
