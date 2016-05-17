@@ -38,6 +38,9 @@ ArduinoNunchuk nunchuk = ArduinoNunchuk();
 int RECV_PIN = 11;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
+//
+//TimerFreeTone lib - alternative to Tone functions
+#include <TimerFreeTone.h>
 //////////////////////////////////////////////////
 
 #define I2C_WRITE                   B00000000
@@ -756,13 +759,18 @@ void sysexCallback(byte command, byte argc, byte *argv)
         unsigned long dur = (unsigned long)argv[0] << 25 | (unsigned long)argv[1] << 18 | (unsigned long)argv[2] << 11 | (unsigned long)argv[3] << 4 | (unsigned long)argv[4] >> 3;
         unsigned int freq = ((unsigned int)argv[4] & B0111) << 13 | (unsigned int)argv[5] << 6 | (unsigned int)argv[6] >> 1;
         byte pin = ((byte)argv[6] & B01) << 7 | (byte)argv[7];
+        /*Code using Tone Commands - Not compatible with IRremote lib
         if (freq <32){
 	        noTone(pin);
         }else if (dur == 0){
 	        tone(pin,freq);
         }else {
           tone(pin,freq,dur);
-        }
+        }*/
+        /*Code using TimerFreeTone lib*/
+        if (freq <100) {freq = 0;}
+        if (dur > 65535) {dur = 65535;}
+        TimerFreeTone(pin, freq, dur);
       }
       break;
 //
