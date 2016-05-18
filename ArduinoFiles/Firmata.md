@@ -388,7 +388,15 @@
   	  board.transport.write(new Buffer(data));
   	  ```
 
-  	* Response definition
+    * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xCB] = function(board) {
+      	var irResult = (board.currentBuffer[2] & 0x7F) << 25| (board.currentBuffer[3] & 0x7F) << 18 | (board.currentBuffer[4] & 0x7F) << 11 | (board.currentBuffer[5] & 0x7F) << 4 | (board.currentBuffer[6] & 0x7F) >> 3;
+      	board.emit("IRrec", irResult);
+      }
+      ```
 
 ## Arduino libraries
 
