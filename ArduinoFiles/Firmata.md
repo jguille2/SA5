@@ -257,11 +257,11 @@
 
   * PulseIn command 0xC8
 
-  	*Arduino values
-  	  * pin ->We use 1 byte (0-255)
-  	  * value ->type of pulse to read (HIGH/LOW) -> 1bit (1/0)
-  	  * timeout (optional)->microseconds to wait for the pulse to be completed ->unsigned long (32 bits-> 0-4294967295 more than 71 minutes). It's optional and its default value is one second -> 1000000.
-  	  * pulse (pulseIn return value) -> microseconds (pulse length) ->unsigned long (32 bits-> 0-4294967295)
+    * Arduino values
+      * pin ->We use 1 byte (0-255)
+      * value ->type of pulse to read (HIGH/LOW) -> 1bit (1/0)
+      * timeout (optional)->microseconds to wait for the pulse to be completed ->unsigned long (32 bits-> 0-4294967295 more than 71 minutes). It's optional and its default value is one second -> 1000000.
+      * pulse (pulseIn return value) -> microseconds (pulse length) ->unsigned long (32 bits-> 0-4294967295)
 
     * Launcher
     
@@ -298,13 +298,13 @@
       	board.emit("pulseIn-"+pin, pulse);
       }
       ```
- * microsecondsPulseOut command 0xC9
+  * microsecondsPulseOut command 0xC9
 
-  	*Arduino values
-  	  * pin ->We use 1 byte (0-255)
-  	  * value ->type of pulse to make (HIGH/LOW) -> 1bit (1/0)
-  	  * time1 (time before), time2 (pulse time) and time3 (time after) in microseconds. We use 11 bits (0-2047 microseconds)
-  	  * We need 42 data bits -> 6 bytes (with 7 data-bits/byte)
+    * Arduino values
+      * pin ->We use 1 byte (0-255)
+      * value ->type of pulse to make (HIGH/LOW) -> 1bit (1/0)
+      * time1 (time before), time2 (pulse time) and time3 (time after) in microseconds. We use 11 bits (0-2047 microseconds)
+      * We need 42 data bits -> 6 bytes (with 7 data-bits/byte)
 
     * Launcher
     
@@ -338,12 +338,12 @@
       ```
   * Ping command 0xCA
 
-  	*Arduino values
-  	  * pinSen -> 1 byte (2-255) for sender pin
-  	  * pinRec -> 1 byte (2-255) for receiver pin
-  	  * pulse -> pulse length response in microseconds -> 2 bytes (0-65535). The maximum distance detected from sensor is about 4m -> 8m of sound tour. 10m would be (29,41µs/cm) 29,41 ms
-  	  * time1 (time before sended pulse) -> 5 bits (0-31) microseconds (typical value is 2 µs)
-  	  * time2 (time of the sended pulse) -> 5 bits (0-31) microseconds (typical value is 5 µs)
+    * Arduino values
+      * pinSen -> 1 byte (2-255) for sender pin
+      * pinRec -> 1 byte (2-255) for receiver pin
+      * pulse -> pulse length response in microseconds -> 2 bytes (0-65535). The maximum distance detected from sensor is about 4m -> 8m of sound tour. 10m would be (29,41µs/cm) 29,41 ms
+      * time1 (time before sended pulse) -> 5 bits (0-31) microseconds (typical value is 2 µs)
+      * time2 (time of the sended pulse) -> 5 bits (0-31) microseconds (typical value is 5 µs)
 
     * Launcher
     
@@ -376,17 +376,17 @@
       ```
   * IR receiver command 0xCB
 
-  	* Arduino values
-  	  * int RECV_PIN = 11 then, pin for IR receiver is fixed
+    * Arduino values
+      * int RECV_PIN = 11 then, pin for IR receiver is fixed
 
-  	* Launcher
+    * Launcher
 
-  	  ```javascript
-  	  //Reporter block
-  	  board = this.context.board; //Definition should change according to the context
-  	  board.once("IRrec", callback(data));
-  	  board.transport.write(new Buffer(data));
-  	  ```
+      ```javascript
+      //Reporter block
+      board = this.context.board; //Definition should change according to the context
+      board.once("IRrec", callback(data));
+      board.transport.write(new Buffer(data));
+      ```
 
     * Response definition
 
