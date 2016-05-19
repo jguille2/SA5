@@ -6,7 +6,7 @@
   * Other libraries:
     * ArduinoNunchuk lib included from https://github.com/GabrielBianconi/ArduinoNunchuk
     * IRremote 2.1.0 from https://github.com/z3t0/Arduino-IRremote
-    * TimerFreeTone v1.3 beta from https://bitbucket.org/teckel12/arduino-timer-free-tone/wiki/Home
+    * TimerFreeTone v1.3 beta (PR in 1.2) from https://bitbucket.org/teckel12/arduino-timer-free-tone/wiki/Home
 
   * Marking digital pins with SHIFT mode (0x05) for firmware detection
     * When code requires ImaginaFirmata firmware, we can use:
@@ -254,6 +254,7 @@
     
     * Arduino Sysex
       * Var types: pin->byte (8bits), freq->unsigned int (16bits) and dur->unsigned long (32bits)
+      * With TimerFreeTone, we need tot disable interrupts for keep right values of frequency and duration.
 
   * PulseIn command 0xC8
 

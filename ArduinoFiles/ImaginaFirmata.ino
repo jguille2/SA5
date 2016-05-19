@@ -770,7 +770,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
         /*Code using TimerFreeTone lib*/
         if (freq <100) {freq = 0;}
         if (dur > 65535) {dur = 65535;}
+		noInterrupts();
         TimerFreeTone(pin, freq, dur);
+		interrupts();
       }
       break;
 //

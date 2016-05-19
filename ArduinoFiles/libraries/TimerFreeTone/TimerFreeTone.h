@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------
-// TimerFreeTone Library - v1.3 BETA - 02/26/2016
+// TimerFreeTone Library - v1.2 - 04/01/2015
 //
 // AUTHOR/LICENSE:
 // Created by Tim Eckel - teckel@leethost.com
-// Copyright 2016 License: GNU GPL v3 http://www.gnu.org/licenses/gpl-3.0.html
+// Copyright 2015 License: GNU GPL v3 http://www.gnu.org/licenses/gpl-3.0.html
 //
 // LINKS:
 // Project home: https://bitbucket.org/teckel12/arduino-timer-free-tone
@@ -28,8 +28,6 @@
 //       * duration   - Set the duration to play in milliseconds. Range: 0 to 65535 (65.5 seconds).
 //
 // HISTORY:
-// 02/26/2016 v1.3 BETA - Fixed problem with long tone play durations.
-//
 // 01/14/2015 v1.2 - Calculates duration differently for higher tone accuracy
 // and smaller code size.
 //
@@ -43,14 +41,14 @@
 // ---------------------------------------------------------------------------
 
 #ifndef TimerFreeTone_h
-	#define TimerFreeTone_h
+  #define TimerFreeTone_h
 
-	#if ARDUINO < 100
-		#include <WProgram.h>
-		#include <pins_arduino.h>
-		#else
-		#include <Arduino.h>
-	#endif
+  #if ARDUINO < 100
+    #include <WProgram.h>
+    #include <pins_arduino.h>
+  #else
+    #include <Arduino.h>
+  #endif
 
-	void TimerFreeTone(uint8_t pin, unsigned long frequency, unsigned int duration);
+  void TimerFreeTone(uint8_t pin, unsigned int frequency, unsigned int duration);
 #endif
