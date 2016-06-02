@@ -38,6 +38,7 @@ ArduinoNunchuk nunchuk = ArduinoNunchuk();
 int RECV_PIN = 11;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
+IRsend irsend;
 //
 //TimerFreeTone lib - alternative to Tone functions
 #include <TimerFreeTone.h>
@@ -874,6 +875,42 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Serial.write((irResult << 3) & B01111000); // LSB
         Serial.write(END_SYSEX);
       }
+	  break;
+//
+	case 0xCC: //Enabling IR. It use timer2 and then, this disables PWM on digital pins 3 and 11
+	  irrecv.enableIRIn();
+	break;
+//
+	case 0xCD: //Disabling IR - Enabling PWM on digital pins 3 and 11
+	//Code form wiring.c, function init
+	// set timer 2 prescale factor to 64
+	#if defined(TCCR2) && defined(CS22)
+		sbi(TCCR2, CS22);
+	#elif defined(TCCR2B) && defined(CS22)
+		sbi(TCCR2B, CS22);
+		//#else
+		// Timer 2 not finished (may not be present on this CPU)
+	#endif
+
+	// configure timer 2 for phase correct pwm (8-bit)
+	#if defined(TCCR2) && defined(WGM20)
+		sbi(TCCR2, WGM20);
+	#elif defined(TCCR2A) && defined(WGM20)
+		sbi(TCCR2A, WGM20);
+		//#else
+		// Timer 2 not finished (may not be present on this CPU)
+	#endif
+
+	break;
+//
+	case 0xCD: //Sending IR
+		unsigned long irMesage;
+		byte type;
+		for (int i = 0; i < 3; i++) {
+			irsend.sendSony(irMesage, 24);
+			delay(40);
+		}
+	break;
 //////////////////////////////////////////////////
   }
 }
@@ -984,7 +1021,7 @@ void setup()
   //Nunchuk setup
   nunchuk.init();
   //IRremote setup
-  irrecv.enableIRIn();
+//  irrecv.enableIRIn();
   //////////////////////////////////////////////////
 }
 
