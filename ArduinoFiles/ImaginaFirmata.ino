@@ -903,11 +903,17 @@ void sysexCallback(byte command, byte argc, byte *argv)
 
 	break;
 //
-	case 0xCD: //Sending IR
-		unsigned long irMesage;
-		byte type;
+	case 0xCE: //Sending IR
+		unsigned long irMessage = (unsigned long)argv[0] << 17 | (unsigned long)argv[1] << 10 | (unsigned long)argv[2] << 3 | (unsigned long)argv[3] >> 4;
+		byte coder = (byte)argv[3] & B01111;
 		for (int i = 0; i < 3; i++) {
-			irsend.sendSony(irMesage, 24);
+			if (coder == 0) {
+			    irsend.sendSony(irMessage, 24);
+			}else if (coder == 1) {
+				irsend.sendRC5(irMessage, 24);
+			} else if (coder == 2) {
+				irsend.sendRC6(irMessage, 24);
+			}
 			delay(40);
 		}
 	break;

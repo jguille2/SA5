@@ -399,10 +399,54 @@
       }
       ```
 
+  * Enabling IR - command 0xCC. Enabling IR. It use timer2 and then, this disables PWM on digital pins 3 and 11
+  
+  * Disabling IR - command 0xCD: Disabling IR - Enabling PWM on digital pins 3 and 11
+
+  * Sending IR - command 0xCE
+
+	* Sending values
+      * We send 4bytes (28 data bits)
+	  * 24 bits to send the *message* (6 hexadecimal digits)
+	  * 4 bits to send protocol type (coder)
+
+    * Launcher
+    
+      ```javascript
+      //Create blocs wit vars: message (24 bits) and coder (string encoded in a 4 bits integer)
+      board = this.context.board;  //Definition should change according to the context
+      if (message === undefined || coder === undefined) {
+        throw new Error("Message and coder are required");
+      }
+	  message = message & parseInt("FFFFFF",16);
+	  if (coder == "RC5") {
+		scoder = 1;
+	  } else if (coder == "RC6") {
+		scoder = 2;
+	  } else {
+		scoder = 0;
+	  }
+      var data =[0xF0, //START_SYSEX
+      		0xCE,  //Send IR
+      		(message >> 17) & 0x7F,
+      		(message >> 10) & 0x7F,
+      		(message >> 3) & 0x7F,
+      		((message << 4) & parseInt("01110000",2)) | (scoder & parseInt("01111",2)),
+      		0xF7  //END_SYSEX
+      ];
+      board.transport.write(new Buffer(data));
+      ```
+
+
+
+
+
 ## Arduino libraries
 
   * Installing arduino libraries info: https://www.arduino.cc/en/Guide/Libraries
   * Tested wit Arduino IDE 1.6.7 (Download: https://www.arduino.cc/en/Main/Software - Source: https://github.com/arduino/Arduino)
   * Firmata lib upgraded (to 2.5.1) online by IDE
   * Copy 3rd party libs into path_to_sketchbook/libraries/
+
+  * Hacking Servo library. It implemends timer1 reseting when all servos are detached.
 
