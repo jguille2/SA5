@@ -437,8 +437,12 @@
       board.transport.write(new Buffer(data));
       ```
 
+  * DHT11 command 0xCF - Request humidity/temperature from DHT11 sensor
 
-
+    * Arduino values
+      * pin ->We use 6 bits (0-64)
+      * param -> 1 bit. 0->Humidity, 1->Temperature
+      * We need 7 data bits -> 1 byte (with 7 data-bits/byte)
 
 
 ## Arduino libraries
