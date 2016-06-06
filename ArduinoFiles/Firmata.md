@@ -349,7 +349,7 @@
     * Launcher
     
       ```javascript
-      //Create blocs wit vars: pinSen, pinRec (2-255), time1 and time2 (0-31 microseconds)
+      //Create blocs with vars: pinSen, pinRec (2-255), time1 and time2 (0-31 microseconds)
       board = this.context.board;  //Definition should change according to the context
       if (pinSen === undefined || pinSen <= 1 || pinSen > 255 || pinRec === undefined || pinRec <= 1 || pinRec > 255) {
         throw new Error("Required vars pinSen and pinRec (2-255)");
@@ -438,11 +438,42 @@
       ```
 
   * DHT11 command 0xCF - Request humidity/temperature from DHT11 sensor
+    Based on http://playground.arduino.cc/Main/DHT11Lib
 
     * Arduino values
-      * pin ->We use 6 bits (0-64)
+      * pin ->We use 6 bits (0-63)
       * param -> 1 bit. 0->Humidity, 1->Temperature
       * We need 7 data bits -> 1 byte (with 7 data-bits/byte)
+
+    * Launcher
+    
+      ```javascript
+      //Create blocs with vars: pin(2-63) and param (0-1)
+      board = this.context.board;  //Definition should change according to the context
+      if (pin === undefined || pin <= 1 || pin > 63) {
+        throw new Error("Required var pin (2-63)");
+      }
+      board.once("DHT11-"+pin+"-"+param, callback(data));
+
+      if (param != 1) param = 0;
+      var data =[0xF0, //START_SYSEX
+      		0xCF,  //DHT11 Command
+      		((pin << 1) |  param)& 0x7F,
+      		0xF7  //END_SYSEX
+      ];
+      board.transport.write(new Buffer(data));
+      ```
+    * Response definition
+
+      ```javascript
+      board = this.context.board; //Definition should change according to the context
+      world.Arduino.firmata.SYSEX_RESPONSE[0xCF] = function(board) {
+      	var response = (board.currentBuffer[2] & 0x7F) << 1 | (board.currentBuffer[3] & 0x01);
+      	var pin = board.currentBuffer[4] >> 1;
+      	var param = board.currentBuffer[4] & 0x01;
+      	board.emit("DHT11-"+pin+"-"+param, response);
+      }
+      ```
 
 
 ## Arduino libraries

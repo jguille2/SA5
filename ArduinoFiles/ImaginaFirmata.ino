@@ -904,6 +904,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 	break;
 //
 	case 0xCE: //Sending IR
+  {
 		unsigned long irMessage = (unsigned long)argv[0] << 17 | (unsigned long)argv[1] << 10 | (unsigned long)argv[2] << 3 | (unsigned long)argv[3] >> 4;
 		byte coder = (byte)argv[3] & B01111;
 		for (int i = 0; i < 3; i++) {
@@ -916,7 +917,76 @@ void sysexCallback(byte command, byte argc, byte *argv)
 			}
 			delay(40);
 		}
+  }
 	break;
+//
+  case 0xCF: //DHT11 command
+  {
+    byte pin = ((byte)argv[0] >> 1) & B0111111;
+    byte param = (byte)argv[0] & B01;
+    // Sensor reading begins
+      // BUFFER TO RECEIVE
+      byte bits[5];
+      for (int i=0; i< 5; i++) bits[i] = 0;
+      byte cnt = 7;
+      byte idx = 0;
+      byte error = 0;
+      // REQUEST SAMPLE
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, LOW);
+      delay(18);
+      digitalWrite(pin, HIGH);
+      delayMicroseconds(40);
+      pinMode(pin, INPUT);
+      // ACKNOWLEDGE or TIMEOUT
+      unsigned int loopCnt = 10000;
+      while(digitalRead(pin) == LOW)
+        if (loopCnt-- == 0) error = 1;
+      loopCnt = 10000;
+      while(digitalRead(pin) == HIGH)
+        if (loopCnt-- == 0) error = 1;
+      // READ OUTPUT - 40 BITS => 5 BYTES or TIMEOUT
+      for (int i=0; i<40; i++) {
+        loopCnt = 10000;
+        while(digitalRead(pin) == LOW)
+        if (loopCnt-- == 0) error = 1;
+          unsigned long t = micros();
+        loopCnt = 10000;
+        while(digitalRead(pin) == HIGH)
+        if (loopCnt-- == 0) error = 1;
+          if ((micros() - t) > 40) bits[idx] |= (1 << cnt);
+        if (cnt == 0) {  // next byte?
+          cnt = 7;    // restart at MSB
+        idx++;      // next byte!
+        } else cnt--;
+      }
+      // WRITE TO RIGHT VARS
+      // as bits[1] and bits[3] are allways zero they are omitted in formulas.
+      byte humidity    = bits[0]; 
+      byte temperature = bits[2]; 
+      int sum = bits[0] + bits[2];  
+      if (bits[4] != sum) error = 1;
+    ///// Sensor readed
+      byte response;
+      if (error == 1) {
+        response = -1;
+      } else if (param == 1) {
+        response = temperature;
+      } else {
+        response = humidity;
+      }
+
+    Serial.write(START_SYSEX);
+    Serial.write(0xCF);
+    Serial.write((response >> 1) & B01111111); // MSB 7 first bits
+    Serial.write(response & B01); // Last bit
+    Serial.write((pin << 1) & B01111110) | (param & B01); //pin and param
+    Serial.write(END_SYSEX);
+    }
+    break;
+
+
+  
 //////////////////////////////////////////////////
   }
 }
