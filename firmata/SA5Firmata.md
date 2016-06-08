@@ -7,10 +7,10 @@
   - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmatab2.xml* have the basic blocks.
 
 ## Libraries
-  - [Firmata](https://github.com/firmata/arduino). Version 2.5.2 (16/02/2016)
+  - [Firmata](https://github.com/firmata/arduino) Version 2.5.2 (16/02/2016)
   - [IRremote](https://github.com/z3t0/Arduino-IRremote) Version 2.1.0 (20/02/2016)
-  - [Nunchuck](https://github.com/GabrielBianconi/ArduinoNunchuk). Version 25/03/2014
-  - [Servo](https://github.com/arduino/Arduino/tree/master/libraries/Servo). Version 1.1.2 (08/03/2016) hacked to allow PWM after detaching.
+  - [Nunchuck](https://github.com/GabrielBianconi/ArduinoNunchuk) Version 25/03/2014
+  - [Servo](https://github.com/arduino/Arduino/tree/master/libraries/Servo) Version 1.1.2 (08/03/2016) hacked to allow PWM after detaching.
 
   You can download directly this libraries, copying *libraries* folder to your *Arduino* folder
 
@@ -53,7 +53,7 @@
 
     * Response definitions
 
-	  *For *joy* and *acc* commands:
+	  * For *joy* and *acc* commands:
 
         ```javascript
         board = this.context.board; //Definition should change according to the context
@@ -63,7 +63,7 @@
         }
         ```
 
-	  *For *but* commands:
+	  * For *but* commands:
 
         ```javascript
         board = this.context.board; //Definition should change according to the context
@@ -72,6 +72,7 @@
       	  board.emit("cS", cS);
         }
         ```
+
 ### Tone command - 0xC7
 
 Implements tone(pin,frequency,*duration) and noTone(pin)
@@ -156,6 +157,7 @@ Implements tone(pin,frequency,*duration) and noTone(pin)
       board.emit("pulseIn-"+pin, pulse);
     }
     ```
+
 ### microsecondsPulseOut command 0xC9
 
   * Arduino values
@@ -300,7 +302,7 @@ Enabling PWM on digital pins 3 and 11
     board.transport.write(new Buffer(data));
     ```
 
-## DHT11 - reporter 0xCF
+### DHT11 - reporter 0xCF
 
 Request humidity/temperature from DHT11 sensor
 Based on http://playground.arduino.cc/Main/DHT11Lib

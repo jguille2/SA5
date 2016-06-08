@@ -28,7 +28,7 @@
 #include <Wire.h>
 #include <Firmata.h>
 //////////////////////////////////////////////////
-//Imagina global includes and vars
+//SA5 global includes and vars
 #include <ArduinoNunchuk.h>
 ArduinoNunchuk nunchuk = ArduinoNunchuk();
 //IRremote lib from https://github.com/z3t0/Arduino-IRremote
@@ -682,7 +682,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 #endif
       break;
 //////////////////////////////////////////////////
-//Imagina commands
+//SA5 commands
 //
 //Nunchuk commands
     case 0xC0: //joyX
@@ -1147,7 +1147,7 @@ void setup()
 
   systemResetCallback();  // reset to default config
   //////////////////////////////////////////////////
-  //Imagina setup
+  //SA5 setup
   //
   nunchuk.init();
   //////////////////////////////////////////////////
