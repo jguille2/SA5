@@ -1,4 +1,5 @@
 /*
+  SA5Firmata version 2.0
   Firmata is a generic protocol for communicating with microcontrollers
   from software on a host computer. It is intended to work with
   any host computer software package.
@@ -620,9 +621,11 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Firmata.write((byte)OUTPUT);
           Firmata.write(1);
 //////////////////////////////////////////////////
-//Imagina. Marking digital pins for firmware detection
-	  	  Firmata.write((byte)0x05); //this is SHIFT mode in Firmata defintition
-	      Firmata.write(1);
+//SA5 version 2. Marking digital pins:  (pin >= 2) && (pin <= version) 
+		  if (pin == 2) {
+	  	    Firmata.write((byte)0x05); //this is SHIFT mode in Firmata defintition
+	        Firmata.write(1);
+		  }
 //////////////////////////////////////////////////
 
         }
@@ -780,11 +783,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
         }else {
           tone(pin,freq,dur);
         }*/
-        /*Code using TimerFreeTone lib*/
+        //Code adapted from TimerFreeTone lib
         if (freq <100) {freq = 0;}
         if (dur > 65535) {dur = 65535;}
 		noInterrupts();
-        //Code adapted from TimerFreeTone lib
 		{
 		  var frequency = freq;
 		  var duration = dur;
@@ -916,9 +918,13 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
 	  break;
 //
+// Enabling IR
+//
 	case 0xCC: //Enabling IR. It use timer2 and then, this disables PWM on digital pins 3 and 11
 	  irrecv.enableIRIn();
 	break;
+//
+// Disabling IR
 //
 	case 0xCD: //Disabling IR - Enabling PWM on digital pins 3 and 11
 	//Code form wiring.c, function init
@@ -942,6 +948,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
 
 	break;
 //
+// Sending IR
+//
 	case 0xCE: //Sending IR
   {
 		unsigned long irMessage = (unsigned long)argv[0] << 17 | (unsigned long)argv[1] << 10 | (unsigned long)argv[2] << 3 | (unsigned long)argv[3] >> 4;
@@ -958,6 +966,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
 		}
   }
 	break;
+//
+// DHT11 sensor
 //
   case 0xCF: //DHT11 command
   {
@@ -1024,8 +1034,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     break;
 
-
-  
+//
+// Ending 16 sysex commands for SA5Firmata  
 //////////////////////////////////////////////////
 
   }
