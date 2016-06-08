@@ -11,7 +11,7 @@
   Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
   Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
   Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2015 Jeff Hoefs.  All rights reserved.
+  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,29 +20,63 @@
 
   See file LICENSE.txt for further informations on licensing terms.
 
-  Last updated by Jeff Hoefs: December 26th, 2015
+  Last updated by Jeff Hoefs: January 10th, 2016
+*/
+
+/*
+  README
+
+  StandardFirmataEthernetPlus is a client implementation. You will need a Firmata client library
+  with a network transport that can act as a server in order to establish a connection between
+  StandardFirmataEthernetPlus and the Firmata client application.
+
+  StandardFirmataEthernetPlus adds additional features that may exceed the Flash and
+  RAM sizes of Arduino boards such as ATMega328p (Uno) and ATMega32u4
+  (Leonardo, Micro, Yun, etc). It is best to use StandardFirmataPlus with a board that
+  has > 32k Flash and > 3k RAM such as: Arduino Mega, Arduino Due, Teensy 3.0/3.1/3.2, etc.
+
+  This sketch consumes too much Flash and RAM to run reliably on an
+  Arduino Leonardo, Yun, ATMega32u4-based board. Use StandardFirmataEthernet.ino instead
+  for those boards and other boards that do not meet the Flash and RAM requirements.
+
+  To use StandardFirmataEthernet you will need to have one of the following
+  boards or shields:
+
+  - Arduino Ethernet shield (or clone)
+  - Arduino Ethernet board (or clone)
+
+  Follow the instructions in the ethernetConfig.h file (ethernetConfig.h tab in Arduino IDE) to
+  configure your particular hardware.
+
+  NOTE: If you are using an Arduino Ethernet shield you cannot use the following pins on
+  the following boards. Firmata will ignore any requests to use these pins:
+
+  - Arduino Mega: (D4, D10, D50, D51, D52, D53)
+  - Arduino Due: (D4, D10)
+  - Arduino Zero: (D4, D10)
+  - Arduino Uno or other ATMega328p boards: (D4, D10, D11, D12, D13)
+
+  If you are using an ArduinoEthernet board, the following pins cannot be used (same as Uno):
+  - D4, D10, D11, D12, D13
 */
 
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
-//////////////////////////////////////////////////
-//Imagina global includes and vars
-//
-//Nunchuk lib from https://github.com/GabrielBianconi/ArduinoNunchuk
-#include <ArduinoNunchuk.h>
-ArduinoNunchuk nunchuk = ArduinoNunchuk();
-//
-//IRremote lib from https://github.com/z3t0/Arduino-IRremote
-#include <IRremote.h>
-int RECV_PIN = 11;
-IRrecv irrecv(RECV_PIN);
-decode_results results;
-IRsend irsend;
-//
-//TimerFreeTone lib - alternative to Tone functions
-#include <TimerFreeTone.h>
-//////////////////////////////////////////////////
+
+/*
+ * Uncomment the #define SERIAL_DEBUG line below to receive serial output messages relating to your connection
+ * that may help in the event of connection issues. If defined, some boards may not begin executing this sketch
+ * until the Serial console is opened.
+ */
+//#define SERIAL_DEBUG
+#include "utility/firmataDebug.h"
+
+// follow the instructions in ethernetConfig.h to configure your particular hardware
+#include "ethernetConfig.h"
+#include "utility/EthernetClientStream.h"
+
+#include "utility/SerialFirmata.h"
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -59,27 +93,44 @@ IRsend irsend;
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
 
-
 /*==============================================================================
  * GLOBAL VARIABLES
  *============================================================================*/
 
+#if defined remote_ip && !defined remote_host
+#ifdef local_ip
+EthernetClientStream stream(client, local_ip, remote_ip, NULL, remote_port);
+#else
+EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), remote_ip, NULL, remote_port);
+#endif
+#endif
+
+#if !defined remote_ip && defined remote_host
+#ifdef local_ip
+EthernetClientStream stream(client, local_ip, IPAddress(0, 0, 0, 0), remote_host, remote_port);
+#else
+EthernetClientStream stream(client, IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0), remote_host, remote_port);
+#endif
+#endif
+
+#ifdef FIRMATA_SERIAL_FEATURE
+SerialFirmata serialFeature;
+#endif
+
 /* analog inputs */
-int analogInputsToReport = 0; // bitwise array to store pin reporting
+int analogInputsToReport = 0;      // bitwise array to store pin reporting
 
 /* digital input ports */
 byte reportPINs[TOTAL_PORTS];       // 1 = report this port, 0 = silence
 byte previousPINs[TOTAL_PORTS];     // previous 8 bits sent
 
 /* pins configuration */
-byte pinConfig[TOTAL_PINS];         // configuration of every pin
 byte portConfigInputs[TOTAL_PORTS]; // each bit: 1 = pin in INPUT, 0 = anything else
-int pinState[TOTAL_PINS];           // any value that has been written
 
 /* timer variables */
 unsigned long currentMillis;        // store the current value from millis()
 unsigned long previousMillis;       // for comparison with currentMillis
-unsigned int samplingInterval = 19; // how often to run the main loop (in ms)
+unsigned int samplingInterval = 19; // how often to sample analog inputs (in ms)
 
 /* i2c data */
 struct i2c_device_info {
@@ -89,7 +140,7 @@ struct i2c_device_info {
   byte stopTX;
 };
 
-/* for i2c read continuous more */
+/* for i2c read continuous mode */
 i2c_device_info query[I2C_MAX_QUERIES];
 
 byte i2cRxData[32];
@@ -217,7 +268,7 @@ void outputPort(byte portNumber, byte portValue, byte forceSend)
 
 /* -----------------------------------------------------------------------------
  * check all the active digital inputs for change of state, then add any events
- * to the Serial output queue using Serial.print() */
+ * to the Stream output queue using Stream.write() */
 void checkDigitalInputs(void)
 {
   /* Using non-looping code allows constants to be given to readPort().
@@ -247,10 +298,10 @@ void checkDigitalInputs(void)
  */
 void setPinModeCallback(byte pin, int mode)
 {
-  if (pinConfig[pin] == PIN_MODE_IGNORE)
+  if (Firmata.getPinMode(pin) == PIN_MODE_IGNORE)
     return;
 
-  if (pinConfig[pin] == PIN_MODE_I2C && isI2CEnabled && mode != PIN_MODE_I2C) {
+  if (Firmata.getPinMode(pin) == PIN_MODE_I2C && isI2CEnabled && mode != PIN_MODE_I2C) {
     // disable i2c so pins can be used for other functions
     // the following if statements should reconfigure the pins properly
     disableI2CPins();
@@ -270,7 +321,7 @@ void setPinModeCallback(byte pin, int mode)
       portConfigInputs[pin / 8] &= ~(1 << (pin & 7));
     }
   }
-  pinState[pin] = 0;
+  Firmata.setPinState(pin, 0);
   switch (mode) {
     case PIN_MODE_ANALOG:
       if (IS_PIN_ANALOG(pin)) {
@@ -281,7 +332,7 @@ void setPinModeCallback(byte pin, int mode)
           digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
 #endif
         }
-        pinConfig[pin] = PIN_MODE_ANALOG;
+        Firmata.setPinMode(pin, PIN_MODE_ANALOG);
       }
       break;
     case INPUT:
@@ -291,33 +342,33 @@ void setPinModeCallback(byte pin, int mode)
         // deprecated since Arduino 1.0.1 - TODO: drop support in Firmata 2.6
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable internal pull-ups
 #endif
-        pinConfig[pin] = INPUT;
+        Firmata.setPinMode(pin, INPUT);
       }
       break;
     case PIN_MODE_PULLUP:
       if (IS_PIN_DIGITAL(pin)) {
         pinMode(PIN_TO_DIGITAL(pin), INPUT_PULLUP);
-        pinConfig[pin] = PIN_MODE_PULLUP;
-        pinState[pin] = 1;
+        Firmata.setPinMode(pin, PIN_MODE_PULLUP);
+        Firmata.setPinState(pin, 1);
       }
       break;
     case OUTPUT:
       if (IS_PIN_DIGITAL(pin)) {
         digitalWrite(PIN_TO_DIGITAL(pin), LOW); // disable PWM
         pinMode(PIN_TO_DIGITAL(pin), OUTPUT);
-        pinConfig[pin] = OUTPUT;
+        Firmata.setPinMode(pin, OUTPUT);
       }
       break;
     case PIN_MODE_PWM:
       if (IS_PIN_PWM(pin)) {
         pinMode(PIN_TO_PWM(pin), OUTPUT);
         analogWrite(PIN_TO_PWM(pin), 0);
-        pinConfig[pin] = PIN_MODE_PWM;
+        Firmata.setPinMode(pin, PIN_MODE_PWM);
       }
       break;
     case PIN_MODE_SERVO:
       if (IS_PIN_DIGITAL(pin)) {
-        pinConfig[pin] = PIN_MODE_SERVO;
+        Firmata.setPinMode(pin, PIN_MODE_SERVO);
         if (servoPinMap[pin] == 255 || !servos[servoPinMap[pin]].attached()) {
           // pass -1 for min and max pulse values to use default values set
           // by Servo library
@@ -329,8 +380,13 @@ void setPinModeCallback(byte pin, int mode)
       if (IS_PIN_I2C(pin)) {
         // mark the pin as i2c
         // the user must call I2C_CONFIG to enable I2C for a device
-        pinConfig[pin] = PIN_MODE_I2C;
+        Firmata.setPinMode(pin, PIN_MODE_I2C);
       }
+      break;
+    case PIN_MODE_SERIAL:
+#ifdef FIRMATA_SERIAL_FEATURE
+      serialFeature.handlePinMode(pin, PIN_MODE_SERIAL);
+#endif
       break;
     default:
       Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
@@ -347,8 +403,8 @@ void setPinModeCallback(byte pin, int mode)
 void setPinValueCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS && IS_PIN_DIGITAL(pin)) {
-    if (pinConfig[pin] == OUTPUT) {
-      pinState[pin] = value;
+    if (Firmata.getPinMode(pin) == OUTPUT) {
+      Firmata.setPinState(pin, value);
       digitalWrite(PIN_TO_DIGITAL(pin), value);
     }
   }
@@ -357,16 +413,16 @@ void setPinValueCallback(byte pin, int value)
 void analogWriteCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS) {
-    switch (pinConfig[pin]) {
+    switch (Firmata.getPinMode(pin)) {
       case PIN_MODE_SERVO:
         if (IS_PIN_DIGITAL(pin))
           servos[servoPinMap[pin]].write(value);
-        pinState[pin] = value;
+        Firmata.setPinState(pin, value);
         break;
       case PIN_MODE_PWM:
         if (IS_PIN_PWM(pin))
           analogWrite(PIN_TO_PWM(pin), value);
-        pinState[pin] = value;
+        Firmata.setPinState(pin, value);
         break;
     }
   }
@@ -384,11 +440,11 @@ void digitalWriteCallback(byte port, int value)
       // do not disturb non-digital pins (eg, Rx & Tx)
       if (IS_PIN_DIGITAL(pin)) {
         // do not touch pins in PWM, ANALOG, SERVO or other modes
-        if (pinConfig[pin] == OUTPUT || pinConfig[pin] == INPUT) {
+        if (Firmata.getPinMode(pin) == OUTPUT || Firmata.getPinMode(pin) == INPUT) {
           pinValue = ((byte)value & mask) ? 1 : 0;
-          if (pinConfig[pin] == OUTPUT) {
+          if (Firmata.getPinMode(pin) == OUTPUT) {
             pinWriteMask |= mask;
-          } else if (pinConfig[pin] == INPUT && pinValue == 1 && pinState[pin] != 1) {
+          } else if (Firmata.getPinMode(pin) == INPUT && pinValue == 1 && Firmata.getPinState(pin) != 1) {
             // only handle INPUT here for backwards compatibility
 #if ARDUINO > 100
             pinMode(pin, INPUT_PULLUP);
@@ -397,7 +453,7 @@ void digitalWriteCallback(byte port, int value)
             pinWriteMask |= mask;
 #endif
           }
-          pinState[pin] = pinValue;
+          Firmata.setPinState(pin, pinValue);
         }
       }
       mask = mask << 1;
@@ -617,11 +673,6 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Firmata.write(1);
           Firmata.write((byte)OUTPUT);
           Firmata.write(1);
-//////////////////////////////////////////////////
-//Imagina. Marking digital pins for firmware detection
-	  	    Firmata.write((byte)0x05); //this is SHIFT mode in Firmata defintition
-	        Firmata.write(1);
-//////////////////////////////////////////////////
         }
         if (IS_PIN_ANALOG(pin)) {
           Firmata.write(PIN_MODE_ANALOG);
@@ -639,6 +690,9 @@ void sysexCallback(byte command, byte argc, byte *argv)
           Firmata.write(PIN_MODE_I2C);
           Firmata.write(1);  // TODO: could assign a number to map to SCL or SDA
         }
+#ifdef FIRMATA_SERIAL_FEATURE
+        serialFeature.handleCapability(pin);
+#endif
         Firmata.write(127);
       }
       Firmata.write(END_SYSEX);
@@ -650,10 +704,10 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Firmata.write(PIN_STATE_RESPONSE);
         Firmata.write(pin);
         if (pin < TOTAL_PINS) {
-          Firmata.write((byte)pinConfig[pin]);
-          Firmata.write((byte)pinState[pin] & 0x7F);
-          if (pinState[pin] & 0xFF80) Firmata.write((byte)(pinState[pin] >> 7) & 0x7F);
-          if (pinState[pin] & 0xC000) Firmata.write((byte)(pinState[pin] >> 14) & 0x7F);
+          Firmata.write(Firmata.getPinMode(pin));
+          Firmata.write((byte)Firmata.getPinState(pin) & 0x7F);
+          if (Firmata.getPinState(pin) & 0xFF80) Firmata.write((byte)(Firmata.getPinState(pin) >> 7) & 0x7F);
+          if (Firmata.getPinState(pin) & 0xC000) Firmata.write((byte)(Firmata.getPinState(pin) >> 14) & 0x7F);
         }
         Firmata.write(END_SYSEX);
       }
@@ -666,328 +720,12 @@ void sysexCallback(byte command, byte argc, byte *argv)
       }
       Firmata.write(END_SYSEX);
       break;
-//////////////////////////////////////////////////
-//Imagina commands
-//
-//Nunchuk commands
-    case 0xC0: //joyX
-      nunchuk.update();
-	  {
-      //byte responseArray[1];
-      //responseArray[0] = nunchuk.analogX;
-      //Firmata.sendSysex(0xC0,1,responseArray);      
-      //Serial.write(START_SYSEX);
-      //Serial.write(STRING_DATA);
-      //Serial.println(nunchuk.analogX, DEC);
-      //Serial.write(END_SYSEX);
-	  byte value = nunchuk.analogX;
-	  Serial.write(START_SYSEX);
-	  Serial.write(0xC0);
-	  Serial.write(value & B01111111); // LSB
-	  Serial.write(value >> 7 & B01111111); // MSB
-	  Serial.write(END_SYSEX);
-	  }
-      break;
-    case 0xC1: //joyY
-      nunchuk.update();
-	  {
-      byte value = nunchuk.analogY;
-	  Serial.write(START_SYSEX);
-	  Serial.write(0xC1);
-	  Serial.write(value & B01111111); // LSB
-	  Serial.write(value >> 7 & B01111111); // MSB
-	  Serial.write(END_SYSEX);
-	  }
-      break;
-    case 0xC2: //butZ
-      nunchuk.update();
-      {
-        byte value = nunchuk.zButton;
-        Serial.write(START_SYSEX);
-        Serial.write(0xC2);
-        Serial.write(value & B01111111); //It's only 1 bit
-        Serial.write(END_SYSEX);
-      }
-      break;
-    case 0xC3: //butC
-      nunchuk.update();
-      {
-        byte value = nunchuk.cButton;
-        Serial.write(START_SYSEX);
-        Serial.write(0xC3);
-        Serial.write(value & B01111111); //It's only 1 bit
-        Serial.write(END_SYSEX);
-      }
-      break;
-    case 0xC4: //accX
-      nunchuk.update();
-      {
-        unsigned int value = nunchuk.accelX;
-        Serial.write(START_SYSEX);
-        Serial.write(0xC4);
-        Serial.write(value & B01111111); // LSB
-        Serial.write(value >> 7 & B01111111); // MSB
-        Serial.write(END_SYSEX);
-      }
-      break;
-    case 0xC5: //accY
-      nunchuk.update();
-      {
-        unsigned int value = nunchuk.accelY;
-        Serial.write(START_SYSEX);
-        Serial.write(0xC5);
-        Serial.write(value & B01111111); // LSB
-        Serial.write(value >> 7 & B01111111); // MSB
-        Serial.write(END_SYSEX);
-      }
-      break;
-    case 0xC6: //accZ
-      nunchuk.update();
-      {
-        unsigned int value = nunchuk.accelZ;
-        Serial.write(START_SYSEX);
-        Serial.write(0xC6);
-        Serial.write(value & B01111111); // LSB
-        Serial.write(value >> 7 & B01111111); // MSB
-        Serial.write(END_SYSEX);
-      }
-      break;
-//
-// Tone commands
-//
-    case 0xC7:  //tone and noTone Commands
-      {
-        unsigned long dur = (unsigned long)argv[0] << 25 | (unsigned long)argv[1] << 18 | (unsigned long)argv[2] << 11 | (unsigned long)argv[3] << 4 | (unsigned long)argv[4] >> 3;
-        unsigned int freq = ((unsigned int)argv[4] & B0111) << 13 | (unsigned int)argv[5] << 6 | (unsigned int)argv[6] >> 1;
-        byte pin = ((byte)argv[6] & B01) << 7 | (byte)argv[7];
-        /*Code using Tone Commands - Not compatible with IRremote lib
-        if (freq <32){
-	        noTone(pin);
-        }else if (dur == 0){
-	        tone(pin,freq);
-        }else {
-          tone(pin,freq,dur);
-        }*/
-        /*Code using TimerFreeTone lib*/
-        if (freq <100) {freq = 0;}
-        if (dur > 65535) {dur = 65535;}
-		noInterrupts();
-        TimerFreeTone(pin, freq, dur);
-		interrupts();
-      }
-      break;
-//
-//PulseIn
-//
-    case 0xC8:  //pulseIn
-      {
-        unsigned long timeout = (unsigned long)argv[0] << 25 | (unsigned long)argv[1] << 18 | (unsigned long)argv[2] << 11 | (unsigned long)argv[3] << 4 | (unsigned long)argv[4] >> 3;
-        byte value = ((byte)argv[4] & B0100) >> 2;
-        byte pin = ((byte)argv[4] & B011) << 6 | ((byte)argv[5] & B0111111);
-        pinMode(pin,INPUT);
-        unsigned long pulse;
-        if (timeout == 0) {
-          pulse = pulseIn(pin,value);
-        } else{
-          pulse = pulseIn(pin,value,timeout);
-        }
-        Serial.write(START_SYSEX);
-        Serial.write(0xC8);
-        Serial.write((pulse >> 25) & B01111111); // MSB
-        Serial.write((pulse >> 18) & B01111111);
-        Serial.write((pulse >> 11) & B01111111);
-        Serial.write((pulse >> 4) & B01111111);
-        Serial.write((pulse << 3) & B01111000 | (pin >> 5) & B0111); //LSB + pinMSB
-        Serial.write(pin & B011111);
-        Serial.write(END_SYSEX);
-      }
-      break;
-//
-//microsecondsPulseOut
-//
-    case 0xC9:  //pulseOut command
-      {
-        unsigned int time1 = (unsigned int)argv[0] << 4 | (unsigned int)argv[1] >> 3;
-        unsigned int time2 = (unsigned int)argv[1] << 8 | (unsigned int)argv[2] << 1 | (unsigned int)argv[3] >> 6;
-        unsigned int time3 = (unsigned int)argv[3] << 5 | (unsigned int)argv[4] >>2;
-        byte value = ((byte)argv[4] & B010) >>1;
-        byte pin = ((byte)argv[4] & B01) << 7 | (byte)argv[5] & B01111111;
-        pinMode(pin,OUTPUT);
-        int state1;
-        int state2;
-        if (value == 1) {
-          state1 = LOW;
-          state2 = HIGH;
-        } else {
-          state1 = HIGH;
-          state2 = LOW;
-        }
-        digitalWrite(pin,state1);
-        delayMicroseconds(time1);
-        digitalWrite(pin,state2);
-        delayMicroseconds(time2);
-        digitalWrite(pin,state1);
-        delayMicroseconds(time3);
-      }
-      break;
-//
-//ping command
-//
-    case 0xCA: //ping command
-      {
-        byte pinSen = (byte)argv[0] << 1 | (byte)argv[1] >> 6;
-        byte pinRec = (byte)argv[2] << 1 | (byte)argv[3] >> 6;
-        byte time1 = (byte)argv[1] & B011111;
-        byte time2 = (byte)argv[3] & B011111;
-        pinMode(pinSen, OUTPUT);
-        digitalWrite(pinSen, LOW);
-        delayMicroseconds(time1);
-        digitalWrite(pinSen, HIGH);
-        delayMicroseconds(time2);
-        digitalWrite(pinSen, LOW);
-        pinMode(pinRec, INPUT);
-        unsigned int pulse = pulseIn(pinRec, HIGH, 65535); //timeout is maximum pulse value
-        Serial.write(START_SYSEX);
-        Serial.write(0xCA);
-        Serial.write((pulse >> 9) & B01111111); // MSB pulse
-        Serial.write((pulse >> 2) & B01111111);
-        Serial.write((pulse << 5) & B01100000) | ((pinRec >> 3) & B011111); //LSB pulse and MSB pinRec
-        Serial.write(pinRec & B0111); // LSB pinRec
-        Serial.write(END_SYSEX);
-      }
-      break;
-//
-//IR receiver
-//
-    case 0xCB: //IR receiver
-      {
-        unsigned long irResult;
-        if (irrecv.decode(&results)) {
-          irResult = results.value;
-          irrecv.resume(); // Receive the next value
-        }
-        Serial.write(START_SYSEX);
-        Serial.write(0xCB);
-        Serial.write((irResult >> 25) & B01111111); // MSB
-        Serial.write((irResult >> 18) & B01111111);
-        Serial.write((irResult >> 11) & B01111111);
-        Serial.write((irResult >> 4) & B01111111);
-        Serial.write((irResult << 3) & B01111000); // LSB
-        Serial.write(END_SYSEX);
-      }
-	  break;
-//
-	case 0xCC: //Enabling IR. It use timer2 and then, this disables PWM on digital pins 3 and 11
-	  irrecv.enableIRIn();
-	break;
-//
-	case 0xCD: //Disabling IR - Enabling PWM on digital pins 3 and 11
-	//Code form wiring.c, function init
-	// set timer 2 prescale factor to 64
-	#if defined(TCCR2) && defined(CS22)
-		sbi(TCCR2, CS22);
-	#elif defined(TCCR2B) && defined(CS22)
-		sbi(TCCR2B, CS22);
-		//#else
-		// Timer 2 not finished (may not be present on this CPU)
-	#endif
 
-	// configure timer 2 for phase correct pwm (8-bit)
-	#if defined(TCCR2) && defined(WGM20)
-		sbi(TCCR2, WGM20);
-	#elif defined(TCCR2A) && defined(WGM20)
-		sbi(TCCR2A, WGM20);
-		//#else
-		// Timer 2 not finished (may not be present on this CPU)
-	#endif
-
-	break;
-//
-	case 0xCE: //Sending IR
-  {
-		unsigned long irMessage = (unsigned long)argv[0] << 17 | (unsigned long)argv[1] << 10 | (unsigned long)argv[2] << 3 | (unsigned long)argv[3] >> 4;
-		byte coder = (byte)argv[3] & B01111;
-		for (int i = 0; i < 3; i++) {
-			if (coder == 0) {
-			    irsend.sendSony(irMessage, 24);
-			}else if (coder == 1) {
-				irsend.sendRC5(irMessage, 24);
-			} else if (coder == 2) {
-				irsend.sendRC6(irMessage, 24);
-			}
-			delay(40);
-		}
-  }
-	break;
-//
-  case 0xCF: //DHT11 command
-  {
-    byte pin = ((byte)argv[0] >> 1) & B0111111;
-    byte param = (byte)argv[0] & B01;
-    // Sensor reading begins
-      // BUFFER TO RECEIVE
-      byte bits[5];
-      for (int i=0; i< 5; i++) bits[i] = 0;
-      byte cnt = 7;
-      byte idx = 0;
-      byte error = 0;
-      // REQUEST SAMPLE
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, LOW);
-      delay(18);
-      digitalWrite(pin, HIGH);
-      delayMicroseconds(40);
-      pinMode(pin, INPUT);
-      // ACKNOWLEDGE or TIMEOUT
-      unsigned int loopCnt = 10000;
-      while(digitalRead(pin) == LOW)
-        if (loopCnt-- == 0) error = 1;
-      loopCnt = 10000;
-      while(digitalRead(pin) == HIGH)
-        if (loopCnt-- == 0) error = 1;
-      // READ OUTPUT - 40 BITS => 5 BYTES or TIMEOUT
-      for (int i=0; i<40; i++) {
-        loopCnt = 10000;
-        while(digitalRead(pin) == LOW)
-        if (loopCnt-- == 0) error = 1;
-          unsigned long t = micros();
-        loopCnt = 10000;
-        while(digitalRead(pin) == HIGH)
-        if (loopCnt-- == 0) error = 1;
-          if ((micros() - t) > 40) bits[idx] |= (1 << cnt);
-        if (cnt == 0) {  // next byte?
-          cnt = 7;    // restart at MSB
-        idx++;      // next byte!
-        } else cnt--;
-      }
-      // WRITE TO RIGHT VARS
-      // as bits[1] and bits[3] are allways zero they are omitted in formulas.
-      byte humidity    = bits[0]; 
-      byte temperature = bits[2]; 
-      int sum = bits[0] + bits[2];  
-      if (bits[4] != sum) error = 1;
-    ///// Sensor readed
-      byte response;
-      if (error == 1) {
-        response = -1;
-      } else if (param == 1) {
-        response = temperature;
-      } else {
-        response = humidity;
-      }
-
-    Serial.write(START_SYSEX);
-    Serial.write(0xCF);
-    Serial.write((response >> 1) & B01111111); // MSB 7 first bits
-    Serial.write(response & B01); // Last bit
-    Serial.write(((pin << 1) & B01111110) | (param & B01)); //pin and param
-    Serial.write(END_SYSEX);
-    }
-    break;
-
-
-  
-//////////////////////////////////////////////////
+    case SERIAL_MESSAGE:
+#ifdef FIRMATA_SERIAL_FEATURE
+      serialFeature.handleSysex(command, argc, argv);
+#endif
+      break;
   }
 }
 
@@ -1025,6 +763,10 @@ void systemResetCallback()
 
   // initialize a defalt state
   // TODO: option to load config from EEPROM instead of default
+
+#ifdef FIRMATA_SERIAL_FEATURE
+  serialFeature.reset();
+#endif
 
   if (isI2CEnabled) {
     disableI2CPins();
@@ -1069,6 +811,16 @@ void systemResetCallback()
 
 void setup()
 {
+  DEBUG_BEGIN(9600);
+
+#ifdef local_ip
+  Ethernet.begin((uint8_t *)mac, local_ip); //start ethernet
+#else
+  Ethernet.begin((uint8_t *)mac);           //start ethernet using dhcp
+#endif
+
+  DEBUG_PRINTLN("connecting...");
+
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
@@ -1080,25 +832,29 @@ void setup()
   Firmata.attach(START_SYSEX, sysexCallback);
   Firmata.attach(SYSTEM_RESET, systemResetCallback);
 
-  // to use a port other than Serial, such as Serial1 on an Arduino Leonardo or Mega,
-  // Call begin(baud) on the alternate serial port and pass it to Firmata to begin like this:
-  // Serial1.begin(57600);
-  // Firmata.begin(Serial1);
-  // then comment out or remove lines 701 - 704 below
+#ifdef WIZ5100_ETHERNET
+  // StandardFirmataEthernetPlus communicates with Ethernet shields over SPI. Therefore all
+  // SPI pins must be set to IGNORE. Otherwise Firmata would break SPI communication.
+  // add Pin 10 and configure pin 53 as output if using a MEGA with an Ethernet shield.
 
-  Firmata.begin(57600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for ATmega32u4-based boards and Arduino 101
+  for (byte i = 0; i < TOTAL_PINS; i++) {
+    if (IS_IGNORE_ETHERNET_SHIELD(i)) {
+      Firmata.setPinMode(i, PIN_MODE_IGNORE);
+    }
   }
+
+  // Arduino Ethernet and Arduino EthernetShield have SD SS wired to D4
+  pinMode(PIN_TO_DIGITAL(4), OUTPUT);    // switch off SD card bypassing Firmata
+  digitalWrite(PIN_TO_DIGITAL(4), HIGH); // SS is active low;
+#endif // WIZ5100_ETHERNET
+
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  pinMode(PIN_TO_DIGITAL(53), OUTPUT); // configure hardware SS as output on MEGA
+#endif
+
+  // start up Network Firmata:
+  Firmata.begin(stream);
   systemResetCallback();  // reset to default config
-  //////////////////////////////////////////////////
-  //Imagina setup
-  //
-  //Nunchuk setup
-  nunchuk.init();
-  //IRremote setup
-//  irrecv.enableIRIn();
-  //////////////////////////////////////////////////
 }
 
 /*==============================================================================
@@ -1109,7 +865,7 @@ void loop()
   byte pin, analogPin;
 
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
-   * FTDI buffer using Serial.print()  */
+   * Stream buffer using Stream.write()  */
   checkDigitalInputs();
 
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
@@ -1124,7 +880,7 @@ void loop()
     previousMillis += samplingInterval;
     /* ANALOGREAD - do all analogReads() at the configured sampling interval */
     for (pin = 0; pin < TOTAL_PINS; pin++) {
-      if (IS_PIN_ANALOG(pin) && pinConfig[pin] == PIN_MODE_ANALOG) {
+      if (IS_PIN_ANALOG(pin) && Firmata.getPinMode(pin) == PIN_MODE_ANALOG) {
         analogPin = PIN_TO_ANALOG(pin);
         if (analogInputsToReport & (1 << analogPin)) {
           Firmata.sendAnalog(analogPin, analogRead(analogPin));
@@ -1138,4 +894,16 @@ void loop()
       }
     }
   }
+
+#ifdef FIRMATA_SERIAL_FEATURE
+  serialFeature.update();
+#endif
+
+#if !defined local_ip
+  // only necessary when using DHCP, ensures local IP is updated appropriately if it changes
+  if (Ethernet.maintain()) {
+    stream.maintain(Ethernet.localIP());
+  }
+#endif
+
 }
