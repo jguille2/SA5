@@ -788,8 +788,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
         if (dur > 65535) {dur = 65535;}
 		noInterrupts();
 		{
-		  var frequency = freq;
-		  var duration = dur;
+		  unsigned int frequency = freq;
+		  unsigned long duration = dur;
   		  if (!frequency) { delay(duration); return; } // Frequency is false (zero), nothing to play, just delay for duration and return.
   		  uint16_t notch = 500000 / frequency;       // Calculate how fast to toggle the pin.
   		  uint32_t loops = (duration * 500L) / notch; // Calculate the number of loops to run.
