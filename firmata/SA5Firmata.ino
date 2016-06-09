@@ -927,7 +927,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 // Disabling IR
 //
 	case 0xCD: //Disabling IR - Enabling PWM on digital pins 3 and 11
-	//Code form wiring.c, function init
+	//Code from wiring.c, function init
 	// set timer 2 prescale factor to 64
 	#if defined(TCCR2) && defined(CS22)
 		sbi(TCCR2, CS22);

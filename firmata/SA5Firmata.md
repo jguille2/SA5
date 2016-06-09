@@ -24,12 +24,13 @@
 ## SA5bs2.xml
 
 ### Checking board has SA5Firmata2.ino - Code for all blocks
-    ```javascript
-    board = this.context.board; //Definition should change according to the context
-    if (board.pins[2].supportedModes.indexOf(0x05) === -1) {
-        throw new Error("Please upload SA5Firmatax.ino on x=2 or higher");
-    }
-    ```
+
+  ```javascript
+  board = this.context.board; //Definition should change according to the context
+  if (board.pins[2].supportedModes.indexOf(0x05) === -1) {
+    throw new Error("Please upload SA5Firmatax.ino on x=2 or higher");
+  }
+  ```
 ### Nunchuk reporters - 0xC0 to 0xC6
 
   * joyX 0xC0 - return 1 byte. From 0 (left position) to 255 (right position). Center = 128
