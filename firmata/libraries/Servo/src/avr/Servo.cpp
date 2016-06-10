@@ -210,6 +210,7 @@ static void finISR(timer16_Sequence_t timer)
 	//
 	//////////////////////////////////////////////////////////////////////JGP
 	//Code from wiring.c. Function init. Reseting timer1
+/*
 	#if defined(TCCR1B) && defined(CS11) && defined(CS10)
 		TCCR1B = 0;
 
@@ -228,6 +229,13 @@ static void finISR(timer16_Sequence_t timer)
 	#if defined(TCCR1A) && defined(WGM10)
 		sbi(TCCR1A, WGM10);
 	#endif
+*/
+//Provisional code - tested in Arduino Uno
+TCCR1B = 0;
+TCCR1B=_BV(CS11);
+TCCR1B=_BV(CS10);
+TCCR1A=_BV(WGM10);
+TIMSK1=0;
 	///////////////////////////////////////////////////////////////////////JGP
 
 #endif
