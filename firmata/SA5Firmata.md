@@ -4,7 +4,7 @@
   - Add specific libraries to your Arduino IDE. You can download directly this libraries, copying *libraries* folder to your *Arduino* folder. Tested with Arduino IDE 1.6.9 from [arduino.cc](https://www.arduino.cc/en/Main/Software)
   - Load SA5Firmata2.ino into your board
   - Open Snap4Arduino (you can download it [here](http://s4a.cat/snap/#download))
-  - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmatab2.xml* have the basic blocks.
+  - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmata_b2.xml* have the basic blocks.
 
 ## Libraries
 

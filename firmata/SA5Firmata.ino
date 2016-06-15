@@ -959,8 +959,6 @@ void sysexCallback(byte command, byte argc, byte *argv)
 			    irsend.sendSony(irMessage, 24);
 			}else if (coder == 1) {
 				irsend.sendRC5(irMessage, 24);
-			} else if (coder == 2) {
-				irsend.sendRC6(irMessage, 24);
 			}
 			delay(40);
 		}
