@@ -1,10 +1,36 @@
 # SA5Firmata 2.0 version
 
-## Install
+Extending StandardFirmata functions for Snap4Arduino.
+
+## Features
+
+StandarFirmata:
+
+  - Read digital and analog pins.
+  - Set ditital states (low or high)
+  - Set values (0-255) to PWM pins
+  - Manage servos (set angle or state)
+
+SA5Firmata extends:
+
+  - Tone functions. It doesn't use standard arduino commands, to leave free timer2 and implements IR library.
+  - PulseIn function.
+  - A pulseOut function (send a microseconds pulse)
+  - Ping function to read distance from Ultrasonic sensors.
+  - Read Nunchuk sensors (joyX, joyY, butZ, butC, accX, accY and accZ) from I2C connection.
+  - Read humidity and temperature from a DHT11 sensor.
+  - Send IR messages by a IR emitter on pin 3. Sony and RC5 protocols availables.
+  - Read IR message from a IR recevier on pin 11.
+  - You can Enable/Disable IR receiving, to leave free timer 2 and enable PWM on pins 3 and 11.
+  - Servo library hacked, to avoid "the detach" disconnecting servos. Then PWM on pins 9 and 10 are again available. 
+
+## Download and Install
+
+  - Download [SA5Firmata 2.0](https://github.com/jguille2/SA5/files/317605/SA5Firmata_2.0.zip)
   - Add specific libraries to your Arduino IDE. You can download directly this libraries, copying *libraries* folder to your *Arduino* folder. Tested with Arduino IDE 1.6.9 from [arduino.cc](https://www.arduino.cc/en/Main/Software)
   - Load SA5Firmata2.ino into your board
   - Open Snap4Arduino (you can download it [here](http://s4a.cat/snap/#download))
-  - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmata_b2.xml* have the basic blocks.
+  - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmata_bs2.xml* have the basic blocks under Arduino category.
 
 ## Libraries
 

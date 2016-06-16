@@ -784,8 +784,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
           tone(pin,freq,dur);
         }*/
         //Code adapted from TimerFreeTone lib
-        if (freq <100) {freq = 0;}
-        if (dur > 65535) {dur = 65535;}
+        if (freq <32) {freq = 0;}
+        if (dur > 60000) {dur = 60000;}
 		noInterrupts();
 		{
 		  unsigned int frequency = freq;
@@ -902,7 +902,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 //
     case 0xCB: //IR receiver
       {
-        unsigned long irResult;
+        unsigned long irResult = 0;
         if (irrecv.decode(&results)) {
           irResult = results.value;
           irrecv.resume(); // Receive the next value
