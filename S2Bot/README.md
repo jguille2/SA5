@@ -17,7 +17,7 @@ We provide the blocks to work with WeDo. It's a first version (but tested and ru
 ###Working wit Lego WeDo
 
   - Use [Snap! online](http://snap.berkeley.edu/run) or an offline version. We can also use [Snap4Arduino](http://s4a.cat/snap/) or other snap based projects.
-  - Import [this file with WeDo blocs](http://ateneu.xtec.cat/wikiform/wikiexport/_media/materials/crea3/hw/ss2bot/blocks_snap_wedo.xml) or [this project](http://ateneu.xtec.cat/wikiform/serveis/media/snapProject_picaxe.xml) with blocks and a mapping example of sensors.
+  - Import [this file with WeDo blocs](http://ateneu.xtec.cat/wikiform/wikiexport/_media/materials/crea3/hw/ss2bot/blocks_snap_wedo.xml) with the WeDo blocks.
   - You can also load [this project](http://snap.berkeley.edu/snapsource/snap.html#present:Username=jguille2&ProjectName=snapBlocks_WeDo) from the cloud.
   - Got to the **Sensing category** and you'll find the generic WeDo blocks.
 
