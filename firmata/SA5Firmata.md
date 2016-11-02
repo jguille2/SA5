@@ -13,7 +13,7 @@ StandarFirmata:
 
 SA5Firmata extends:
 
-  - Tone functions. It doesn't use standard arduino commands, to leave free timer2 and implements IR library.
+  - Tone function. It doesn't use standard arduino command, to leave free timer2 and implements IR library. This is a blocking function.
   - PulseIn function.
   - A pulseOut function (send a microseconds pulse)
   - Ping function to read distance from Ultrasonic sensors.
@@ -22,15 +22,24 @@ SA5Firmata extends:
   - Send IR messages by a IR emitter on pin 3. Sony and RC5 protocols availables.
   - Read IR message from a IR recevier on pin 11.
   - You can Enable/Disable IR receiving, to leave free timer 2 and enable PWM on pins 3 and 11.
-  - Servo library hacked, to avoid "the detach" disconnecting servos. Then PWM on pins 9 and 10 are again available. 
+  - Servo library hacked, to avoid "the detach" disconnecting servos. Then PWM on pins 9 and 10 are again available.
+
+SA5Firmata_tone:
+
+  - Every SA5Firmata functions except IR.
+  - Tone functions use standard arduino command. So, this is not a blocking function.
 
 ## Download and Install
 
   - Download [SA5Firmata 2.0](https://github.com/jguille2/SA5/files/317605/SA5Firmata_2.0.zip)
   - Add specific libraries to your Arduino IDE. You can download directly this libraries, copying *libraries* folder to your *Arduino* folder. Tested with Arduino IDE 1.6.9 from [arduino.cc](https://www.arduino.cc/en/Main/Software)
   - Load SA5Firmata2.ino into your board
-  - Open Snap4Arduino (you can download it [here](http://s4a.cat/snap/#download))
+  - Open Snap4Arduino (you can download it [here](http://snap4arduino.org))
   - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmata_bs2.xml* have the basic blocks under Arduino category.
+----
+  - You can use [SA5Firmata_tone_2.0](https://github.com/jguille2/SA5/files/566599/SA5Firmata_tone_2.0.zip) to use a more powerful tone function (not blocking), but this hasn't IR features.
+    - Download it and load SA5Firmata2_tone.ino to your board.
+    - You have SA5Firmata_tone_bs2.xml blocks. But you can use standard SA5Firmata blocks (unless IR).
 
 ## Libraries
 
