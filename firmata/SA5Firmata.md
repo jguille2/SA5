@@ -36,6 +36,7 @@ SA5Firmata_tone:
   - Load SA5Firmata2.ino into your board
   - Open Snap4Arduino (you can download it [here](http://snap4arduino.org))
   - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmata_bs2.xml* have the basic blocks under Arduino category.
+  
 ----
   - You can use [SA5Firmata_tone_2.0](https://github.com/jguille2/SA5/files/566599/SA5Firmata_tone_2.0.zip) to use a more powerful tone function (not blocking), but this hasn't IR features.
     - Download it and load SA5Firmata2_tone.ino to your board.
