@@ -380,3 +380,9 @@ Based on http://playground.arduino.cc/Main/DHT11Lib
     }
     ```
 
+### LCD commands (I2C or 6pins direct management)  0xD0 - 0xD2
+
+### LCD print 0xD0
+
+
+
