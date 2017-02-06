@@ -38,8 +38,16 @@ IRrecv irrecv(RECV_PIN);
 decode_results results;
 IRsend irsend;
 #include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x3F, 16, 2);
+LiquidCrystal_I2C lcd1(0x3F,16,2);
+LiquidCrystal_I2C lcd2(0x3F,16,2);
+LiquidCrystal_I2C lcd3(0x3F,16,2);
+LiquidCrystal_I2C lcd4(0x3F,16,2);
+LiquidCrystal_I2C lcd5(0x3F,16,2);
+LiquidCrystal_I2C lcd6(0x3F,16,2);
+LiquidCrystal_I2C lcd7(0x3F,16,2);
+LiquidCrystal_I2C lcd8(0x3F,16,2);
 #include <LiquidCrystal.h>
+//LiquidCrystal lcd[8];
 //////////////////////////////////////////////////
 
 #define I2C_WRITE                   B00000000
@@ -1035,34 +1043,179 @@ void sysexCallback(byte command, byte argc, byte *argv)
     }
     break;
 	case 0xD0:
-		if (argv[0] == 0) {
-			LiquidCrystal_I2C lcd(argv[1], 16, 2);
-			for (int c = 6; c < argc; c++) {
-        		lcd.write(argv[c]);
-    		}
+		if (argv[1] == 0) {
+			switch(argv[0]) {
+				case 1:
+				LiquidCrystal_I2C lcd1(argv[2], argv[7], argv[8]);
+				lcd1.begin();
+				break;
+				case 2:
+				LiquidCrystal_I2C lcd2(argv[2], argv[7], argv[8]);
+				lcd2.begin();
+				break;
+				case 3:
+				LiquidCrystal_I2C lcd3(argv[2], argv[7], argv[8]);
+				lcd3.begin();
+				break;
+				case 4:
+				LiquidCrystal_I2C lcd4(argv[2], argv[7], argv[8]);
+				lcd4.begin();
+				break;
+				case 5:
+				LiquidCrystal_I2C lcd5(argv[2], argv[7], argv[8]);
+				lcd5.begin();
+				break;
+				case 6:
+				LiquidCrystal_I2C lcd6(argv[2], argv[7], argv[8]);
+				lcd6.begin();
+				break;
+				case 7:
+				LiquidCrystal_I2C lcd7(argv[2], argv[7], argv[8]);
+				lcd7.begin();
+				break;
+				case 8:
+				LiquidCrystal_I2C lcd8(argv[2], argv[7], argv[8]);
+				lcd8.begin();
+				break;
+
+			}
 		} else {
-			LiquidCrystal lcd(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-			for (int c = 6; c < argc; c++) {
-        		lcd.write(argv[c]);
-    		}
+			switch(argv[0]) {
+				case 1:
+				LiquidCrystal lcd1(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+				lcd1.begin(argv[7], argv[8]);
+				break;
+				case 2:
+				LiquidCrystal lcd2(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+				lcd2.begin(argv[7], argv[8]);
+				break;
+				case 3:
+				LiquidCrystal lcd3(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+				lcd3.begin(argv[7], argv[8]);
+				break;
+				case 4:
+				LiquidCrystal lcd4(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+				lcd4.begin(argv[7], argv[8]);
+				break;
+				case 5:
+				LiquidCrystal lcd5(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+				lcd5.begin(argv[7], argv[8]);
+				break;
+				case 6:
+				LiquidCrystal lcd6(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+				lcd6.begin(argv[7], argv[8]);
+				break;
+				case 7:
+				LiquidCrystal lcd7(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+				lcd7.begin(argv[7], argv[8]);
+				break;
+				case 8:
+				LiquidCrystal lcd8(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+				lcd8.begin(argv[7], argv[8]);
+				break;
+			}
 		}
+		
 	break;
 	case 0xD1:
-		if (argv[0] == 0) {
-			LiquidCrystal_I2C lcd(argv[1], 16, 2);
-			lcd.begin();
-		} else {
-			LiquidCrystal lcd(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-			lcd.begin(16,2);
+		switch(argv[0]) {
+			case 1:
+			lcd1.clear();
+			break;
+			case 2:
+			lcd2.clear();
+			break;
+			case 3:
+			lcd3.clear();
+			break;
+			case 4:
+			lcd4.clear();
+			break;
+			case 5:
+			lcd5.clear();
+			break;
+			case 6:
+			lcd6.clear();
+			break;
+			case 7:
+			lcd7.clear();
+			break;
+			case 8:
+			lcd8.clear();
+			break;
 		}
 	break;
 	case 0xD2:
-		if (argv[0] == 0) {
-			LiquidCrystal_I2C lcd(argv[1], 16, 2);
-			lcd.setCursor(argv[6], argv[7]);
-		} else {
-			LiquidCrystal lcd(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-			lcd.setCursor(argv[6], argv[7]);
+		switch(argv[0]) {
+			case 1:
+			for (int c = 1; c < argc; c++) {
+        		lcd1.write(argv[c]);
+    		}
+			break;
+			case 2:
+			for (int c = 1; c < argc; c++) {
+        		lcd2.write(argv[c]);
+    		}
+			break;
+			case 3:
+			for (int c = 1; c < argc; c++) {
+        		lcd3.write(argv[c]);
+    		}
+			break;
+			case 4:
+			for (int c = 1; c < argc; c++) {
+        		lcd4.write(argv[c]);
+    		}
+			break;
+			case 5:
+			for (int c = 1; c < argc; c++) {
+        		lcd5.write(argv[c]);
+    		}
+			break;
+			case 6:
+			for (int c = 1; c < argc; c++) {
+        		lcd6.write(argv[c]);
+    		}
+			break;
+			case 7:
+			for (int c = 1; c < argc; c++) {
+        		lcd7.write(argv[c]);
+    		}
+			break;
+			case 8:
+			for (int c = 1; c < argc; c++) {
+        		lcd8.write(argv[c]);
+    		}
+			break;
+		}
+
+	break;
+	case 0xD3:
+		switch(argv[0]) {
+			case 1:
+			lcd1.setCursor(argv[1], argv[2]);
+			break;
+			case 2:
+			lcd2.setCursor(argv[1], argv[2]);
+			break;
+			case 3:
+			lcd3.setCursor(argv[1], argv[2]);
+			break;
+			case 4:
+			lcd4.setCursor(argv[1], argv[2]);
+			break;
+			case 5:
+			lcd5.setCursor(argv[1], argv[2]);
+			break;
+			case 6:
+			lcd6.setCursor(argv[1], argv[2]);
+			break;
+			case 7:
+			lcd7.setCursor(argv[1], argv[2]);
+			break;
+			case 8:
+			lcd8.setCursor(argv[1], argv[2]);
+			break;
 		}
 	break;
 
