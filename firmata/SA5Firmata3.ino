@@ -38,7 +38,7 @@ IRrecv irrecv(RECV_PIN);
 decode_results results;
 IRsend irsend;
 #include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
 #include <LiquidCrystal.h>
 //////////////////////////////////////////////////
 
@@ -1037,12 +1037,12 @@ void sysexCallback(byte command, byte argc, byte *argv)
 	case 0xD0:
 		if (argv[0] == 0) {
 			LiquidCrystal_I2C lcd(argv[1], 16, 2);
-			for (int c = 2; c < argc; c++) {
+			for (int c = 6; c < argc; c++) {
         		lcd.write(argv[c]);
     		}
-		} else if (argv[0] ==1) {
-			LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-			for (int c = 2; c < argc; c++) {
+		} else {
+			LiquidCrystal lcd(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+			for (int c = 6; c < argc; c++) {
         		lcd.write(argv[c]);
     		}
 		}
@@ -1050,19 +1050,19 @@ void sysexCallback(byte command, byte argc, byte *argv)
 	case 0xD1:
 		if (argv[0] == 0) {
 			LiquidCrystal_I2C lcd(argv[1], 16, 2);
-			lcd.clear();
-		} else if (argv[0] ==1) {
-			LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-			lcd.clear();
+			lcd.begin();
+		} else {
+			LiquidCrystal lcd(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+			lcd.begin(16,2);
 		}
 	break;
 	case 0xD2:
 		if (argv[0] == 0) {
 			LiquidCrystal_I2C lcd(argv[1], 16, 2);
-			lcd.setCursor(argv[2], argv[3]);
-		} else if (argv[0] ==1) {
-			LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-			lcd.setCursor(argv[2], argv[3]);
+			lcd.setCursor(argv[6], argv[7]);
+		} else {
+			LiquidCrystal lcd(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+			lcd.setCursor(argv[6], argv[7]);
 		}
 	break;
 
