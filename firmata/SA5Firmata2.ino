@@ -892,7 +892,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
         Serial.write(0xCA);
         Serial.write((pulse >> 9) & B01111111); // MSB pulse
         Serial.write((pulse >> 2) & B01111111);
-        Serial.write((pulse << 5) & B01100000) | ((pinRec >> 3) & B011111); //LSB pulse and MSB pinRec
+        Serial.write((pulse << 5) & B01100000 | (pinRec >> 3) & B011111); //LSB pulse and MSB pinRec
         Serial.write(pinRec & B0111); // LSB pinRec
         Serial.write(END_SYSEX);
       }
