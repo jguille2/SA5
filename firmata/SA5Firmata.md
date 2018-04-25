@@ -1,4 +1,4 @@
-# SA5Firmata 2.0 version
+# SA5Firmata 2.1 version
 
 Extending StandardFirmata functions for Snap4Arduino.
 
@@ -31,14 +31,14 @@ SA5Firmata_tone:
 
 ## Download and Install
 
-  - Download [SA5Firmata 2.0](https://github.com/jguille2/SA5/files/695087/SA5Firmata_2.0.zip)
+  - Download [SA5Firmata 2.1](https://github.com/jguille2/SA5/raw/master/firmata/SA5Firmata_2.1.zip)
   - Add specific libraries to your Arduino IDE. You can download directly this libraries, copying *libraries* folder to your *Arduino* folder. Tested with Arduino IDE 1.6.9 from [arduino.cc](https://www.arduino.cc/en/Main/Software)
   - Load SA5Firmata2.ino into your board
   - Open Snap4Arduino (you can download it [here](http://snap4arduino.org))
   - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmata_bs2.xml* have the basic blocks under Arduino category.
   
 ----
-  - You can use [SA5Firmata_tone 2.0](https://github.com/jguille2/SA5/files/695088/SA5Firmata_tone_2.0.zip) to use a more powerful tone function (not blocking), but this hasn't IR features.
+  - You can use [SA5Firmata_tone 2.1](https://github.com/jguille2/SA5/raw/master/firmata/SA5Firmata_tone_2.1.zip) to use a more powerful tone function (not blocking), but this hasn't IR features.
     - Download it and load SA5Firmata2_tone.ino to your board.
     - You have SA5Firmata_tone_bs2.xml blocks. But you can use standard SA5Firmata blocks (unless IR).
 
