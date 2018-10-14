@@ -3,7 +3,7 @@ Snap! and Arduino 5ynchronized
 
 ## Working with Snap! and Arduino
 
-  - [Snap4Arduino](http://snap4arduino.rocks) allows us to work with [Snap!](http://snap.berkeley.edu/) and [Arduino](https://www.arduino.cc/)  together. There are [downloads](http://s4a.cat/snap/#download) for Linux, Mac and Windows.
+  - [Snap4Arduino](http://snap4arduino.rocks) allows us to work with [Snap!](http://snap.berkeley.edu/) and [Arduino](https://www.arduino.cc/)  together. There are [downloads](http://snap4arduino.rocks/#download) for Linux, Mac and Windows and also an _online_version.
   - Snap! is a very customizable tool. You can **create your own custom blocks** and also you can **hide primitive** ones. Then, the **starting point** of the work with Snap4Arduino is not unique and it can be adapted to different levels of education, different projects, boards...
   - Snap4Arduino uses **StandardFirmata** firmware to connect our PC with the Arduino board. This implement several basic functions:
     - Read digital and analog pins.
@@ -11,7 +11,7 @@ Snap! and Arduino 5ynchronized
     - Set values (0-255) to PWM pins
     - Manage servos (set angle or state)
 
-!(Snap4Arduino Blocks)[images/sa4_blocks.png)
+!(Snap4Arduino Blocks)[https://github.com/jguille2/SA5/raw/master/images/sa4_blocks.png)
 
 ## SA5Firmata
 
@@ -30,7 +30,7 @@ Extends firmata with:
   - You can Enable/Disable IR receiving, to leave free timer 2 and enable PWM on pins 3 and 11.
   - Servo library hacked, to avoid "the detach" disconnecting servos. Then PWM on pins 9 and 10 are again available. 
 
-!(SA5Firmata Blocks)[images/sa5firmata_blocks.png)
+!(SA5Firmata Blocks)[https://github.com/jguille2/SA5/raw/master/images/sa5firmata_blocks.png)
 
 ## Another "Firmata" boards
 
@@ -44,9 +44,9 @@ Also, we can use a network connection if these connection offers a serial signal
 
 ## Working with Snap! and Picaxe
 
-We can use S2P Picaxe software (made to sync Scratch and Picaxe) and work with Snap!. More info [here](https://github.com/jguille2/SA5/blob/master/Picaxe/README.md).
+We can use [S2P](http://www.picaxe.com/Software/Third-Party/Scratch/) Picaxe software (made to sync Scratch and Picaxe) and work with Snap!. More info [here](https://github.com/jguille2/SA5/blob/master/Picaxe/README.md).
 
 ## Working with Snap! and other devices
 
-Using [S2Bot](http://www.picaxe.com/Teaching/Other-Software/Scratch-Helper-Apps) you can play with Snap! and other devices like BBC Microbit, LEGO WeDo (1 and 2.0) and Boost...
+Using [S2Bot](http://www.picaxe.com/Teaching/Other-Software/Scratch-Helper-Apps) Picaxe software you can play with Snap! and other devices like BBC Microbit, LEGO WeDo (1 and 2.0) and Boost... More info [here](https://github.com/jguille2/SA5/blob/master/S2Bot).
 

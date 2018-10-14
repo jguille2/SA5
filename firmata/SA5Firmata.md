@@ -11,7 +11,7 @@ Extending StandardFirmata functions for Snap4Arduino.
   - Set values (0-255) to PWM pins
   - Manage servos (set angle or state)
 
-!(Snap4Arduino Blocks)[images/sa4_blocks.png)
+!(Snap4Arduino Blocks)[https://github.com/jguille2/SA5/raw/master/images/sa4_blocks.png)
 
 ### SA5Firmata extends:
 
@@ -26,7 +26,7 @@ Extending StandardFirmata functions for Snap4Arduino.
   - You can Enable/Disable IR receiving, to leave free timer 2 and enable PWM on pins 3 and 11.
   - Servo library hacked, to avoid "the detach" disconnecting servos. Then PWM on pins 9 and 10 are again available.
 
-!(SA5Firmata Blocks)[images/sa5firmata_blocks.png)
+!(SA5Firmata Blocks)[https://github.com/jguille2/SA5/raw/master/images/sa5firmata_blocks.png)
 
 ### Two flavours
 
@@ -37,7 +37,7 @@ Extending StandardFirmata functions for Snap4Arduino.
 ## Download and Install
 
 Snap4Arduino 1.2.7 (and above) offers SA5Firmata blocks into its _libraries..._
-!(SA5Firmata library)[images/sa5firmataLibrary.png]
+!(SA5Firmata library)[https://github.com/jguille2/SA5/raw/master/images/sa5firmataLibrary.png]
 
 You can also get that _xml_ files from this download.
 
