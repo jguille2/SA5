@@ -11,7 +11,7 @@ Snap! and Arduino 5ynchronized
     - Set values (0-255) to PWM pins
     - Manage servos (set angle or state)
 
-!(Snap4Arduino Blocks)[https://github.com/jguille2/SA5/raw/master/images/sa4_blocks.png)
+![Snap4Arduino Blocks](https://github.com/jguille2/SA5/raw/master/images/sa4_blocks.png)
 
 ## SA5Firmata
 
@@ -30,7 +30,7 @@ Extends firmata with:
   - You can Enable/Disable IR receiving, to leave free timer 2 and enable PWM on pins 3 and 11.
   - Servo library hacked, to avoid "the detach" disconnecting servos. Then PWM on pins 9 and 10 are again available. 
 
-!(SA5Firmata Blocks)[https://github.com/jguille2/SA5/raw/master/images/sa5firmata_blocks.png)
+![SA5Firmata Blocks](https://github.com/jguille2/SA5/raw/master/images/sa5firmata_blocks.png)
 
 ## Another "Firmata" boards
 
