@@ -1,4 +1,4 @@
-#SA5Firmata version 5  - Snap4Arduino 1.2.7
+# SA5Firmata version 5  - Snap4Arduino 1.2.7
 
 Extending StandardFirmata functions for Snap4Arduino.
 
@@ -11,7 +11,7 @@ Extending StandardFirmata functions for Snap4Arduino.
   - Set values (0-255) to PWM pins
   - Manage servos (set angle or state)
 
-![Snap4Arduino Blocks](https://github.com/jguille2/SA5/raw/master/images/sa4_blocks.png)
+![Snap4Arduino Blocks](https://github.com/jguille2/SA5/raw/master/images/s4a_blocks.png)
 
 ### SA5Firmata extends:
 
@@ -37,18 +37,17 @@ Extending StandardFirmata functions for Snap4Arduino.
 ## Download and Install
 
 Snap4Arduino 1.2.7 (and above) offers SA5Firmata blocks into its _libraries..._
+
 ![SA5Firmata library](https://github.com/jguille2/SA5/raw/master/images/sa5firmataLibrary.png)
 
-You can also get that _xml_ files from this download.
 
-But remember! SA5Firmata firmware must be uploaded (only one time!) to your device to get this extra functions enabled. So...
+But remember! SA5Firmata firmware must be uploaded (only once!) to your device to get this extra functions enabled. So...
 
   - Download [SA5Firmata version 5](https://github.com/jguille2/SA5/raw/master/firmata/SA5Firmata_5.zip) and unzip it.
   - To add the specific libraries required to your Arduino IDE, copy directly the _libraries_ folder to your *Arduino* folder. You need Arduino IDE version 1.6.9 or higher from [arduino.cc](https://www.arduino.cc/en/Main/Software)
   - Using Arduino IDE, upload *SA5Firmata_tone.ino* or *SA5Firmata_ir.ino* to your board.
-  - Open Snap4Arduino (you can download it [here](http://snap4arduino.rocks))
-  - Open _Libraries..._ from Snap4Arduino File menu. You  can choose SA5Firmata or SA5FirmataIR
-  - Load the *xml* file with the blocks created for SA5Firmata. *SA5Firmata_bs2.xml* have the basic blocks under Arduino category.
+
+  - And that's all. You can open  **SA5Firmata** or **SA5FirmataIR** libreries from Snap4Arduino since 1.2.7. Also, you can pick the _xml_ files from the downloaded files.
   
 ## Previous versions
 

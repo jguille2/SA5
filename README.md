@@ -3,7 +3,7 @@ Snap! and Arduino 5ynchronized
 
 ## Working with Snap! and Arduino
 
-  - [Snap4Arduino](http://snap4arduino.rocks) allows us to work with [Snap!](http://snap.berkeley.edu/) and [Arduino](https://www.arduino.cc/)  together. There are [downloads](http://snap4arduino.rocks/#download) for Linux, Mac and Windows and also an _online_version.
+  - [Snap4Arduino](http://snap4arduino.rocks) allows us to work with [Snap!](http://snap.berkeley.edu/) and [Arduino](https://www.arduino.cc/)  together. There are [downloads](http://snap4arduino.rocks/#download) for Linux, Mac and Windows and also an _online_ version.
   - Snap! is a very customizable tool. You can **create your own custom blocks** and also you can **hide primitive** ones. Then, the **starting point** of the work with Snap4Arduino is not unique and it can be adapted to different levels of education, different projects, boards...
   - Snap4Arduino uses **StandardFirmata** firmware to connect our PC with the Arduino board. This implement several basic functions:
     - Read digital and analog pins.
@@ -11,7 +11,7 @@ Snap! and Arduino 5ynchronized
     - Set values (0-255) to PWM pins
     - Manage servos (set angle or state)
 
-![Snap4Arduino Blocks](https://github.com/jguille2/SA5/raw/master/images/sa4_blocks.png)
+![Snap4Arduino Blocks](https://github.com/jguille2/SA5/raw/master/images/s4a_blocks.png)
 
 ## SA5Firmata
 
