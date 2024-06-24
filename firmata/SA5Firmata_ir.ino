@@ -933,18 +933,18 @@ void sysexCallback(byte command, byte argc, byte *argv)
   //Code from wiring.c, function init
   // set timer 2 prescale factor to 64
   #if defined(TCCR2) && defined(CS22)
-    TCCR2 |= (1 << CS22);  // sbi(TCCR2, CS22);  <-- old version of the code dosen't supported in new version of C++
+    TCCR2 |= (1 << CS22);  // sbi(TCCR2, CS22);  <-- old version of the code dosen't supported
   #elif defined(TCCR2B) && defined(CS22)
-    TCCR2B |= (1 << CS22); // sbi(TCCR2B, CS22); <-- old version of the code dosen't supported in new version of C++
+    TCCR2B |= (1 << CS22); // sbi(TCCR2B, CS22); <-- old version of the code dosen't supported
     //#else
     // Timer 2 not finished (may not be present on this CPU)
   #endif
 
   // configure timer 2 for phase correct pwm (8-bit)
   #if defined(TCCR2) && defined(WGM20)
-    TCCR2 |= (1 << WGM20); // sbi(TCCR2, WGM20); <-- old version of the code dosen't supported in new version of C++
+    TCCR2 |= (1 << WGM20); // sbi(TCCR2, WGM20); <-- old version of the code dosen't supported
   #elif defined(TCCR2A) && defined(WGM20)
-    TCCR2A |= (1 << WGM20); // sbi(TCCR2A, WGM20); <-- old version of the code dosen't supported in new version of C++
+    TCCR2A |= (1 << WGM20); // sbi(TCCR2A, WGM20); <-- old version of the code dosen't supported
     //#else
     // Timer 2 not finished (may not be present on this CPU)
   #endif
