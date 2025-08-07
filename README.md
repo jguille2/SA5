@@ -1,7 +1,7 @@
 # SA5
 Snap! and Arduino 5ynchronized
 
-## Basic Firmata for S4AConnector Snap! extension
+## Firmata for S4AConnector Snap! extension
 
   - [S4AConnector](https://github.com/jguille2/snap_s4aConn) Snap! library allows us to connect "All Firmata Boards" to [Snap!](http://snap.berkeley.edu/)
   Then, you can connect all your UNO, Nano, Mega, Leonardo, Micro, Due, 101, ESP8266, NodeMCU... to your Snap! projects and dynamically control their functionalities.
@@ -13,7 +13,7 @@ Snap! and Arduino 5ynchronized
     - Manage servos (set angle or state)
   - These are the main blocks of this extension
   
-![S4A Connector main blocks](https://github.com/jguille2/SA5/raw/master/images/s4a_blocks.png)
+![S4A Connector main blocks](https://github.com/jguille2/SA5/raw/master/historic/images/s4a_blocks.png)
 
   - And also, we can us
 ## SA5Firmata to extend firmata features
@@ -32,8 +32,8 @@ Snap! and Arduino 5ynchronized
   - Servo library hacked, to avoid "the detach" disconnecting servos. Then PWM on pins 9 and 10 are again available. 
   - Neopixels management
 
-And then, we have extra blocks to manage our boards.
+And then, with SA5 firmware we have extra blocks to manage our boards.
 
-![SA5Firmata Blocks](https://github.com/jguille2/SA5/raw/master/images/sa5firmata_blocks.png)
+![SA5Firmata Blocks](https://github.com/jguille2/SA5/raw/master/historic/images/sa5firmata_blocks.png)
 
 
